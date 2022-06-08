@@ -2,7 +2,7 @@
 pragma solidity 0.8.*;
 
 import"https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
- 
+
 contract Voting is Ownable {
     uint winningProposalId;
     mapping(address => Voter) _voters;
@@ -33,7 +33,7 @@ contract Voting is Ownable {
         VotesTallied
     }
 
-    event VoterRegistered(address voterAddress); 
+    event VoterRegistered(address voterAddress);
     event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
     event ProposalRegistered(uint proposalId);
     event Voted (address voter, uint proposalId);
@@ -43,7 +43,7 @@ contract Voting is Ownable {
         require(_voters[msg.sender].isRegistered, "only registered users are allowed to perform this action.");
         _;
     }
-    
+
     function getWinner() public view returns(uint) {
         require(_voteState == WorkflowStatus.VotesTallied, "Voting session still ongoing.");
         return winningProposalId;
@@ -54,7 +54,7 @@ contract Voting is Ownable {
         return _proposals[winningProposalId].description;
     }
 
-    function getVote(address _address) public  view returns(uint) {
+    function getUserVote(address _address) public view returns(uint) {
         require(_voters[msg.sender].isRegistered || isOwner(), "only registered users or contract owner are allowed to perform this action.");
         require(_voters[_address].hasVoted, "Voter has not voted yet");
         return _voters[_address].votedProposalId;
@@ -72,16 +72,16 @@ contract Voting is Ownable {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration is not possible at this stage.");
         _proposals.push(Proposal(_description, 0));
         // Cost in gas d'incrémenter un proposal ID en variable d'état vs faire un _proposal.length à chaque event ?
-        emit ProposalRegistered(_proposals.length);
+        emit ProposalRegistered(_proposals.length - 1);
     }
 
-    function voteForProposal(uint _proposalIndex) public onlyRegisteredVoters {
+    function voteForProposal(uint _proposalId) public onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.VotingSessionStarted, "Voting is not possible at this stage.");
         require(!_voters[msg.sender].hasVoted, "Voter has already voted");
         _voters[msg.sender].hasVoted = true;
-        _voters[msg.sender].votedProposalId = _proposalIndex;
-        _proposals[_proposalIndex].voteCount += 1;
-        emit Voted(msg.sender, _proposalIndex);
+        _voters[msg.sender].votedProposalId = _proposalId;
+        _proposals[_proposalId].voteCount += 1;
+        emit Voted(msg.sender, _proposalId);
     }
 
     function tallyVotes() public onlyOwner {
@@ -94,11 +94,15 @@ contract Voting is Ownable {
                 winningProposalId = i;
             }
         }
+        if(maxVotes == 0) {
+            _voteState = WorkflowStatus.VotingSessionStarted;
+            revert("Nobody Voted, please start over");
+        }
         markVotesAsTallied();
     }
 
     /*Workflow state management*/
-    
+
     function initiatePropsalsRegistration() onlyOwner public {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.ProposalsRegistrationStarted;
@@ -116,13 +120,13 @@ contract Voting is Ownable {
         _voteState = WorkflowStatus.VotingSessionStarted;
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationEnded, WorkflowStatus.VotingSessionStarted);
     }
-    
+
     function closeVotingSession() onlyOwner public {
         require(_voteState == WorkflowStatus.VotingSessionStarted, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.VotingSessionEnded;
         emit WorkflowStatusChange(WorkflowStatus.VotingSessionStarted, WorkflowStatus.VotingSessionEnded);
     }
-    
+
     function markVotesAsTallied() onlyOwner private {
         require(_voteState == WorkflowStatus.VotingSessionEnded, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.VotesTallied;
