@@ -39,6 +39,7 @@ contract Voting is Ownable {
 
     constructor() {
         _voteState = WorkflowStatus.RegisteringVoters;
+        _proposals.push(Proposal("Blank vote", 0));
     }
 
     modifier onlyRegisteredVoters() {
@@ -64,18 +65,27 @@ contract Voting is Ownable {
         return _voters[_address].votedProposalId;
     }
 
-    function registerVoter(address _address) onlyOwner external {
+    //TODO: Change to external
+    function registerVoter(address _address) onlyOwner public {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Registration period ended.");
         require(!_voters[_address].isRegistered, "Voter already registered.");
         _voters[_address].isRegistered = true;
         emit VoterRegistered(_address);
     }
-
-    function registerProposal(string memory _description) external onlyRegisteredVoters {
+    //TODO: Change to external
+    function registerProposal(string memory _description) public onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration is not possible at this stage.");
         _proposals.push(Proposal(_description, 0));
         // Cost in gas d'incrémenter un proposal ID en variable d'état vs faire un _proposal.length à chaque event ?
         emit ProposalRegistered(_proposals.length - 1);
+    }
+
+    function blankVote () external onlyRegisteredVoters {
+        require(_voteState == WorkflowStatus.VotingSessionStarted, "Voting is not possible at this stage.");
+        require(!_voters[msg.sender].hasVoted, "Voter has already voted");
+        _voters[msg.sender].hasVoted = true;
+        _proposals[0].voteCount += 1;
+        emit Voted(msg.sender, 0);
     }
 
     function voteForProposal(uint _proposalId) external onlyRegisteredVoters {
@@ -91,7 +101,7 @@ contract Voting is Ownable {
         require(_voteState == WorkflowStatus.VotingSessionEnded, "Voting is not possible at this stage.");
         uint maxVotes;
 
-        for(uint i = 0; i < _proposals.length; i++) {
+        for(uint i = 1; i < _proposals.length; i++) {
             if(_proposals[i].voteCount > maxVotes) {
                 maxVotes = _proposals[i].voteCount;
                 winningProposalId = i;
@@ -100,7 +110,8 @@ contract Voting is Ownable {
         if(maxVotes == 0) {
             _voteState = WorkflowStatus.VotingSessionStarted;
             emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotingSessionStarted);
-            emit Issue ("Nobody voted, voting session reset.");
+            emit Issue ("Nobody voted for a proposal, voting session reset.");
+            //TODO: Implement reset votes blancs si que des votes blancs?
         } else {
             markVotesAsTallied();
         }
@@ -139,10 +150,9 @@ contract Voting is Ownable {
     }
 
 
+    /*Functions for test purposes - To be Deleted in Prod*/
 
-    /*Functions for test purposes - To be Deleted in Prod
-
-    SET REGISTERVOTER() TO PUBLIC BEFORE EXECUTING THIS FUNCTION
+    // SET REGISTERVOTER() TO PUBLIC BEFORE EXECUTING THIS FUNCTION
     function TESTregisterVoters() onlyOwner public {
         registerVoter(0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2);
         registerVoter(0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db);
@@ -153,8 +163,8 @@ contract Voting is Ownable {
         registerVoter(0x03C6FcED478cBbC9a4FAB34eF9f40767739D1Ff7);
 
     }
-    SET REGISTERPROPOSAL() TO PUBLIC BEFORE EXECUTING THIS FUNCTION
-    function TESTresisterProposals() onlyRegisteredVoters public {
+    // SET REGISTERPROPOSAL() TO PUBLIC BEFORE EXECUTING THIS FUNCTION
+    function TESTregisterProposals() onlyRegisteredVoters public {
         registerProposal("La Proposal de ouf");
         registerProposal("La Proposal de malade");
         registerProposal("La Proposal en or");
@@ -163,5 +173,6 @@ contract Voting is Ownable {
         registerProposal("La Proposal unique");
         registerProposal("La 7eme Proposal");
     }
-    */
+
+
 } 
