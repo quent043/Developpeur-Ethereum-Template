@@ -7,6 +7,7 @@ contract Voting is Ownable {
 
     uint winningProposalId;
     mapping(address => Voter) _voters;
+    address[] _registeredAddresses;
     Proposal[] public _proposals;
     WorkflowStatus _voteState;
 
@@ -70,6 +71,7 @@ contract Voting is Ownable {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Registration period ended.");
         require(!_voters[_address].isRegistered, "Voter already registered.");
         _voters[_address].isRegistered = true;
+        _registeredAddresses.push(_address);
         emit VoterRegistered(_address);
     }
     //TODO: Change to external
@@ -108,12 +110,19 @@ contract Voting is Ownable {
             }
         }
         if(maxVotes == 0) {
-            _voteState = WorkflowStatus.VotingSessionStarted;
+            resetVotingSession();
             emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotingSessionStarted);
             emit Issue ("Nobody voted for a proposal, voting session reset.");
-            //TODO: Implement reset votes blancs si que des votes blancs?
         } else {
             markVotesAsTallied();
+        }
+    }
+
+    function resetVotingSession() private onlyOwner {
+        _proposals[0].voteCount = 0;
+        _voteState = WorkflowStatus.VotingSessionStarted;
+        for (uint i = 0; i < _registeredAddresses.length; i++) {
+            _voters[_registeredAddresses[i]].hasVoted = false;
         }
     }
 
@@ -173,6 +182,4 @@ contract Voting is Ownable {
         registerProposal("La Proposal unique");
         registerProposal("La 7eme Proposal");
     }
-
-
-} 
+}
