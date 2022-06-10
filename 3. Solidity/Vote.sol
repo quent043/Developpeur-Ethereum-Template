@@ -10,6 +10,9 @@ contract Voting is Ownable {
     address[] _registeredAddresses;
     Proposal[] public _proposals;
     WorkflowStatus _voteState;
+    Proposal[] public _secondRoundProposals;
+    uint[] public _electedProposalIds;
+    uint public maxVotes;
 
     struct Voter {
         bool isRegistered;
@@ -35,7 +38,7 @@ contract Voting is Ownable {
     event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
     event ProposalRegistered(uint proposalId);
     event Voted (address voter, uint proposalId);
-    event Issue (string description);
+    event VoteResult (string description);
 
 
     constructor() {
@@ -67,6 +70,7 @@ contract Voting is Ownable {
     }
 
     //TODO: Change to external
+    // function registerVoter(address _address) onlyOwner external {
     function registerVoter(address _address) onlyOwner public {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Registration period ended.");
         require(!_voters[_address].isRegistered, "Voter already registered.");
@@ -74,8 +78,9 @@ contract Voting is Ownable {
         _registeredAddresses.push(_address);
         emit VoterRegistered(_address);
     }
-    //TODO: Change to external
-    function registerProposal(string memory _description) public onlyRegisteredVoters {
+    //TODO: Change to external et check si ca marche avec calldata
+    // function registerProposal(string calldata _description) external onlyRegisteredVoters {
+    function registerProposal(string memory _description) public {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration is not possible at this stage.");
         _proposals.push(Proposal(_description, 0));
         // Cost in gas d'incrémenter un proposal ID en variable d'état vs faire un _proposal.length à chaque event ?
@@ -90,7 +95,8 @@ contract Voting is Ownable {
         emit Voted(msg.sender, 0);
     }
 
-    function voteForProposal(uint _proposalId) external onlyRegisteredVoters {
+    // function voteForProposal(uint _proposalId) external onlyRegisteredVoters {
+    function voteForProposal(uint _proposalId) external {
         require(_voteState == WorkflowStatus.VotingSessionStarted, "Voting is not possible at this stage.");
         require(!_voters[msg.sender].hasVoted, "Voter has already voted");
         _voters[msg.sender].hasVoted = true;
@@ -101,46 +107,73 @@ contract Voting is Ownable {
 
     function tallyVotes() external onlyOwner {
         require(_voteState == WorkflowStatus.VotingSessionEnded, "Voting is not possible at this stage.");
-        uint maxVotes;
+        // uint maxVotes;
+        // Proposal[] storage _electedProposals;
+        // uint[] storage _electedProposalIds;
 
+        //TODO: Manque, reset le ex aequo si plus de vote sur une autre proposal
         for(uint i = 1; i < _proposals.length; i++) {
-            if(_proposals[i].voteCount > maxVotes) {
+            if(_proposals[i].voteCount != 0 && _proposals[i].voteCount > maxVotes) {
                 maxVotes = _proposals[i].voteCount;
-                winningProposalId = i;
+                _electedProposalIds = [i];
+            }
+            if(_proposals[i].voteCount != 0 && _proposals[i].voteCount == maxVotes) {
+                emit VoteResult("tick");
+                _electedProposalIds.push(i);
             }
         }
+
         if(maxVotes == 0) {
-            resetVotingSession();
+            _proposals[0].voteCount = 0;
+            resetVotersStatus();
             emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotingSessionStarted);
-            emit Issue ("Nobody voted for a proposal, voting session reset.");
-        } else {
+            emit VoteResult ("Nobody voted for a proposal, voting session reset.");
+        }
+        else if ( _electedProposalIds.length == 1) {
+            winningProposalId = _electedProposalIds[0];
             markVotesAsTallied();
+            emit VoteResult ("A Proposal was elected with a majority.");
+        }
+        else {
+            _secondRoundProposals.push(Proposal("Blanc vote", 0));
+            for (uint i = 0; i < _electedProposalIds.length; i++) {
+                _secondRoundProposals.push(Proposal(_proposals[_electedProposalIds[i]].description, 0));
+            }
+            _proposals = _secondRoundProposals;
+            delete _secondRoundProposals;
+            delete _electedProposalIds;
+            delete maxVotes;
+            resetVotersStatus();
+            emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotingSessionStarted);
+            emit VoteResult ("There was an ex-aequo in several proposals. Voting session reset with elected proposals only.");
         }
     }
 
-    function resetVotingSession() private onlyOwner {
-        _proposals[0].voteCount = 0;
-        _voteState = WorkflowStatus.VotingSessionStarted;
+    function resetVotersStatus() private onlyOwner {
         for (uint i = 0; i < _registeredAddresses.length; i++) {
             _voters[_registeredAddresses[i]].hasVoted = false;
         }
+        _voteState = WorkflowStatus.VotingSessionStarted;
     }
 
     /*Workflow state management*/
 
-    function initiatePropsalsRegistration() onlyOwner external {
+    // function initiatePropsalsRegistration() onlyOwner external {
+    function initiatePropsalsRegistration() onlyOwner public {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.ProposalsRegistrationStarted;
         emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters, WorkflowStatus.ProposalsRegistrationStarted);
     }
 
-    function closePrpopsalsRegistration() onlyOwner external {
+    // function closePrpopsalsRegistration() onlyOwner external {
+    function closePrpopsalsRegistration() onlyOwner public {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.ProposalsRegistrationEnded;
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted, WorkflowStatus.ProposalsRegistrationEnded);
     }
 
-    function initiateVotingSession() onlyOwner external {
+    // function initiateVotingSession() onlyOwner external {
+    function initiateVotingSession() onlyOwner public {
         require(_voteState == WorkflowStatus.ProposalsRegistrationEnded, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.VotingSessionStarted;
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationEnded, WorkflowStatus.VotingSessionStarted);
@@ -171,9 +204,16 @@ contract Voting is Ownable {
         registerVoter(0x5c6B0f7Bf3E7ce046039Bd8FABdfD3f9F5021678);
         registerVoter(0x03C6FcED478cBbC9a4FAB34eF9f40767739D1Ff7);
 
+        initiatePropsalsRegistration();
+        TESTregisterProposals();
+        closePrpopsalsRegistration();
+        initiateVotingSession();
+
+
+
     }
     // SET REGISTERPROPOSAL() TO PUBLIC BEFORE EXECUTING THIS FUNCTION
-    function TESTregisterProposals() onlyRegisteredVoters public {
+    function TESTregisterProposals() public {
         registerProposal("La Proposal de ouf");
         registerProposal("La Proposal de malade");
         registerProposal("La Proposal en or");
@@ -182,4 +222,5 @@ contract Voting is Ownable {
         registerProposal("La Proposal unique");
         registerProposal("La 7eme Proposal");
     }
+
 }
