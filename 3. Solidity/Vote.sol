@@ -35,7 +35,7 @@ contract Voting is Ownable {
     event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
     event ProposalRegistered(uint proposalId);
     event Voted (address voter, uint proposalId);
-    event Issue (string description);
+    event VoteStatus (string description);
 
 
     constructor() {
@@ -48,8 +48,7 @@ contract Voting is Ownable {
         _;
     }
 
-    /*Gardé le winningProposalId privé avec un getter pour que le résultat ne soit consultable qu'au dernier stade du workflow
-    Sinon en gardant winningProposalId public, il renvoie par défaut "0" qui est l'id de la première proposal.*/
+    /* Gardé le winningProposalId privé avec un getter pour que le résultat ne soit consultable qu'au dernier stade du workflow */
     function getWinner() external view returns(uint) {
         require(_voteState == WorkflowStatus.VotesTallied, "Voting session still ongoing.");
         return winningProposalId;
@@ -66,19 +65,16 @@ contract Voting is Ownable {
         return _voters[_address].votedProposalId;
     }
 
-    //TODO: Change to external
-    function registerVoter(address _address) onlyOwner public {
+    function registerVoter(address _address) onlyOwner external {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Registration period ended.");
         require(!_voters[_address].isRegistered, "Voter already registered.");
         _voters[_address].isRegistered = true;
         _registeredAddresses.push(_address);
         emit VoterRegistered(_address);
     }
-    //TODO: Change to external
-    function registerProposal(string memory _description) public onlyRegisteredVoters {
+    function registerProposal(string calldata _description) external onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration is not possible at this stage.");
         _proposals.push(Proposal(_description, 0));
-        // Cost in gas d'incrémenter un proposal ID en variable d'état vs faire un _proposal.length à chaque event ?
         emit ProposalRegistered(_proposals.length - 1);
     }
 
@@ -111,9 +107,9 @@ contract Voting is Ownable {
         }
         if(maxVotes == 0) {
             resetVotingSession();
-            emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotingSessionStarted);
-            emit Issue ("Nobody voted for a proposal, voting session reset.");
+            emit VoteStatus ("Nobody voted for a proposal, voting session reset.");
         } else {
+            emit VoteStatus ("A proposal was elected with a majority.");
             markVotesAsTallied();
         }
     }
@@ -121,6 +117,7 @@ contract Voting is Ownable {
     function resetVotingSession() private onlyOwner {
         _proposals[0].voteCount = 0;
         _voteState = WorkflowStatus.VotingSessionStarted;
+        emit WorkflowStatusChange(WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotingSessionStarted);
         for (uint i = 0; i < _registeredAddresses.length; i++) {
             _voters[_registeredAddresses[i]].hasVoted = false;
         }
@@ -130,6 +127,7 @@ contract Voting is Ownable {
 
     function initiatePropsalsRegistration() onlyOwner external {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Wrong workflow execution order.");
+        require(_registeredAddresses.length >= 2, "You need at least 2 persons to initiate a session.");
         _voteState = WorkflowStatus.ProposalsRegistrationStarted;
         emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters, WorkflowStatus.ProposalsRegistrationStarted);
     }
@@ -159,7 +157,7 @@ contract Voting is Ownable {
     }
 
 
-    /*Functions for test purposes - To be Deleted in Prod*/
+    /*Functions for test purposes - To be Deleted in Prod
 
     // SET REGISTERVOTER() TO PUBLIC BEFORE EXECUTING THIS FUNCTION
     function TESTregisterVoters() onlyOwner public {
@@ -181,5 +179,5 @@ contract Voting is Ownable {
         registerProposal("La Proposal cool");
         registerProposal("La Proposal unique");
         registerProposal("La 7eme Proposal");
-    }
+    }*/
 }
