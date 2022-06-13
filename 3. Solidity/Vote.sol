@@ -75,10 +75,10 @@ contract Voting is Ownable {
     function registerProposal(string calldata _description) external onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration is not possible at this stage.");
         _proposals.push(Proposal(_description, 0));
-        emit ProposalRegistered(_proposals.length - 1);
+        emit ProposalRegistered(_proposals.length);
     }
 
-    function blankVote () external onlyRegisteredVoters {
+    function blankVote() external onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.VotingSessionStarted, "Voting is not possible at this stage.");
         require(!_voters[msg.sender].hasVoted, "Voter has already voted");
         _voters[msg.sender].hasVoted = true;
