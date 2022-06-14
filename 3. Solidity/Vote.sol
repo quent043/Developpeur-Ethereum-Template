@@ -9,7 +9,7 @@ contract Voting is Ownable {
     mapping(address => Voter) _voters;
     address[] _registeredAddresses;
     Proposal[] public _proposals;
-    WorkflowStatus _voteState;
+    WorkflowStatus public _voteState;
 
     struct Voter {
         bool isRegistered;
