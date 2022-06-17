@@ -8,7 +8,7 @@ contract Voting is Ownable {
     uint winningProposalId;
     mapping(address => Voter) _voters;
     address[] _registeredAddresses;
-    Proposal[] public _proposals;
+    Proposal[] _proposals;
     WorkflowStatus public _voteState;
 
     struct Voter {
@@ -51,47 +51,64 @@ contract Voting is Ownable {
     /* Gardé le winningProposalId privé avec un getter pour que le résultat ne soit consultable qu'au dernier stade du workflow */
     function getWinner() external view returns(uint) {
         require(_voteState == WorkflowStatus.VotesTallied, "Voting session still ongoing.");
+
         return winningProposalId;
     }
 
     function getDetailedWinningProposal() external view returns(Proposal memory) {
         require(_voteState == WorkflowStatus.VotesTallied, "Voting session still ongoing.");
+
         return _proposals[winningProposalId];
     }
 
     function getUserVote(address _address) external view returns(uint) {
         require(_voters[msg.sender].isRegistered || isOwner(), "only registered users or contract owner are allowed to perform this action.");
         require(_voters[_address].hasVoted, "Voter has not voted yet");
+
         return _voters[_address].votedProposalId;
+    }
+
+    function getProposal(uint _proposalId) external onlyRegisteredVoters returns(Proposal memory) {
+        return _proposals[_proposalId];
     }
 
     function registerVoter(address _address) onlyOwner external {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Registration period ended.");
         require(!_voters[_address].isRegistered, "Voter already registered.");
+
         _voters[_address].isRegistered = true;
         _registeredAddresses.push(_address);
+
         emit VoterRegistered(_address);
     }
     function registerProposal(string calldata _description) external onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Proposals registration is not possible at this stage.");
+        require(keccak256(abi.encode(_description)) != keccak256(abi.encode("")), "Vous devez proposer quelque chose");
+
         _proposals.push(Proposal(_description, 0));
+
         emit ProposalRegistered(_proposals.length);
     }
 
     function blankVote() external onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.VotingSessionStarted, "Voting is not possible at this stage.");
         require(!_voters[msg.sender].hasVoted, "Voter has already voted");
+
         _voters[msg.sender].hasVoted = true;
         _proposals[0].voteCount += 1;
+
         emit Voted(msg.sender, 0);
     }
 
     function voteForProposal(uint _proposalId) external onlyRegisteredVoters {
         require(_voteState == WorkflowStatus.VotingSessionStarted, "Voting is not possible at this stage.");
         require(!_voters[msg.sender].hasVoted, "Voter has already voted");
+        require(_proposalId < _proposals.length, "Proposal not found");
+
         _voters[msg.sender].hasVoted = true;
         _voters[msg.sender].votedProposalId = _proposalId;
-        _proposals[_proposalId].voteCount += 1;
+        _proposals[_proposalId].voteCount++;
+
         emit Voted(msg.sender, _proposalId);
     }
 
@@ -128,31 +145,37 @@ contract Voting is Ownable {
     function initiatePropsalsRegistration() onlyOwner external {
         require(_voteState == WorkflowStatus.RegisteringVoters, "Wrong workflow execution order.");
         require(_registeredAddresses.length >= 2, "You need at least 2 persons to initiate a session.");
+
         _voteState = WorkflowStatus.ProposalsRegistrationStarted;
+
         emit WorkflowStatusChange(WorkflowStatus.RegisteringVoters, WorkflowStatus.ProposalsRegistrationStarted);
     }
 
     function closePrpopsalsRegistration() onlyOwner external {
         require(_voteState == WorkflowStatus.ProposalsRegistrationStarted, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.ProposalsRegistrationEnded;
+
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationStarted, WorkflowStatus.ProposalsRegistrationEnded);
     }
 
     function initiateVotingSession() onlyOwner external {
         require(_voteState == WorkflowStatus.ProposalsRegistrationEnded, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.VotingSessionStarted;
+
         emit WorkflowStatusChange(WorkflowStatus.ProposalsRegistrationEnded, WorkflowStatus.VotingSessionStarted);
     }
 
     function closeVotingSession() onlyOwner external {
         require(_voteState == WorkflowStatus.VotingSessionStarted, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.VotingSessionEnded;
+
         emit WorkflowStatusChange(WorkflowStatus.VotingSessionStarted, WorkflowStatus.VotingSessionEnded);
     }
 
     function markVotesAsTallied() onlyOwner private {
         require(_voteState == WorkflowStatus.VotingSessionEnded, "Wrong workflow execution order.");
         _voteState = WorkflowStatus.VotesTallied;
+
         emit WorkflowStatusChange( WorkflowStatus.VotingSessionEnded, WorkflowStatus.VotesTallied);
     }
 
