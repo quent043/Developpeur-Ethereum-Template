@@ -15,6 +15,44 @@ contract("Voting", function(accounts) {
         this.VotingInstance = await Voting.new({from: owner});
     });
 
+    describe("getVoter function", function() {
+        beforeEach(async function() {
+            await this.VotingInstance.addVoter(voterAddress, {from: owner});
+            await this.VotingInstance.addVoter(secondVoterAddress, {from: owner});
+            await this.VotingInstance.addVoter(thirdVoterAddress, {from: owner});
+        });
+
+        it("Should return the right voter if given an index", async function() {
+            const result = await this.VotingInstance.getVoter(secondVoterAddress, {from: voterAddress});
+            expect(result.isRegistered).to.equal(true);
+            expect(result.hasVoted).to.equal(false);
+            expect(result.votedProposalId).to.be.bignumber.equal(new BN(0));
+        });
+
+        it("Should not be executable by non-voters", async function() {
+            await expectRevert(this.VotingInstance.getVoter(thirdVoterAddress, {from: accounts[4]}),"You're not a voter");
+        });
+    });
+
+    describe("getOneProposal function", function() {
+        beforeEach(async function() {
+            await this.VotingInstance.addVoter(voterAddress, {from: owner});
+            await this.VotingInstance.startProposalsRegistering({from: owner});
+            await this.VotingInstance.addProposal(proposalDescription, {from: voterAddress});
+            await this.VotingInstance.addProposal(secondProposalDescription, {from: voterAddress});
+        });
+
+        it("Should return the right proposal if given an index", async function() {
+            const result = await this.VotingInstance.getOneProposal(1, {from: voterAddress});
+            expect(result.description).to.equal(secondProposalDescription);
+            expect(result.voteCount).to.be.bignumber.equal(new BN(0));
+        });
+
+        it("Should not be executable by non-voters", async function() {
+            await expectRevert(this.VotingInstance.getOneProposal(0, {from: accounts[2]}),"You're not a voter");
+        });
+    });
+
     describe("addVoter function", function() {
         it("Should correctly register a voter", async function() {
             const addingVoter = await this.VotingInstance.addVoter(voterAddress, {from: owner});
@@ -53,6 +91,7 @@ contract("Voting", function(accounts) {
 
             const result = await this.VotingInstance.addProposal(proposalDescription, {from: voterAddress});
 
+            /*On store une proposal, qui sera a l'index '0'*/
             const proposalFromArray = await this.VotingInstance.getOneProposal(0, {from: voterAddress});
             expect(proposalFromArray.description).to.equal(proposalDescription);
 
@@ -83,19 +122,28 @@ contract("Voting", function(accounts) {
     });
 
     describe("setVote function", function() {
-        const voteId = new BN(1);
-        it("Should register voter's vote & status", async function(){
+        beforeEach(async function() {
             await this.VotingInstance.addVoter(voterAddress, {from: owner});
             await this.VotingInstance.startProposalsRegistering({from: owner});
             await this.VotingInstance.addProposal(proposalDescription, {from: voterAddress});
+        });
+
+        const voteId = new BN(1);
+        it("Should register voter's vote & status", async function(){
+            let voter = await this.VotingInstance.getVoter(voterAddress, {from: voterAddress});
             await this.VotingInstance.addProposal(secondProposalDescription, {from: voterAddress});
             await this.VotingInstance.endProposalsRegistering({from: owner});
             await this.VotingInstance.startVotingSession({from: owner});
+            let proposalFromArray = await this.VotingInstance.getOneProposal(1, {from: voterAddress});
+
+            expect(voter.hasVoted).to.equal(false);
+            expect(voter.votedProposalId).to.be.bignumber.equal(new BN(0));
+            expect(proposalFromArray.voteCount).to.be.bignumber.equal(new BN(0));
 
             const result = await this.VotingInstance.setVote(1, {from: voterAddress});
 
-            const voter = await this.VotingInstance.getVoter(voterAddress, {from: voterAddress});
-            const proposalFromArray = await this.VotingInstance.getOneProposal(1, {from: voterAddress});
+            voter = await this.VotingInstance.getVoter(voterAddress, {from: voterAddress});
+            proposalFromArray = await this.VotingInstance.getOneProposal(1, {from: voterAddress});
 
             expect(voter.hasVoted).to.equal(true);
             expect(voter.votedProposalId).to.be.bignumber.equal(voteId);
@@ -105,9 +153,6 @@ contract("Voting", function(accounts) {
         });
 
         it("Should not allow non-voters to vote", async function(){
-            await this.VotingInstance.addVoter(voterAddress, {from: owner});
-            await this.VotingInstance.startProposalsRegistering({from: owner});
-            await this.VotingInstance.addProposal(proposalDescription, {from: voterAddress});
             await this.VotingInstance.endProposalsRegistering({from: owner});
             await this.VotingInstance.startVotingSession({from: owner});
 
@@ -115,9 +160,6 @@ contract("Voting", function(accounts) {
         });
 
         it("Should not allow voters to vote twice", async function(){
-            await this.VotingInstance.addVoter(voterAddress, {from: owner});
-            await this.VotingInstance.startProposalsRegistering({from: owner});
-            await this.VotingInstance.addProposal(proposalDescription, {from: voterAddress});
             await this.VotingInstance.endProposalsRegistering({from: owner});
             await this.VotingInstance.startVotingSession({from: owner});
 
@@ -126,9 +168,6 @@ contract("Voting", function(accounts) {
         });
 
         it("Should not allow voters to vote for non existing proposals", async function(){
-            await this.VotingInstance.addVoter(voterAddress, {from: owner});
-            await this.VotingInstance.startProposalsRegistering({from: owner});
-            await this.VotingInstance.addProposal(proposalDescription, {from: voterAddress});
             await this.VotingInstance.endProposalsRegistering({from: owner});
             await this.VotingInstance.startVotingSession({from: owner});
 
@@ -136,9 +175,6 @@ contract("Voting", function(accounts) {
         });
 
         it("Should not allow proposal registration during the wrong workflow status", async function() {
-            await this.VotingInstance.addVoter(voterAddress, {from: owner});
-            await this.VotingInstance.startProposalsRegistering({from: owner});
-            await this.VotingInstance.addProposal(proposalDescription, {from: voterAddress});
             await this.VotingInstance.addProposal(secondProposalDescription, {from: voterAddress});
             await this.VotingInstance.endProposalsRegistering({from: owner});
 
@@ -153,6 +189,7 @@ contract("Voting", function(accounts) {
         const endProposalRegisteringStatus = new BN(2);
         const startVotingStatus = new BN(3);
         const endVotingStatus = new BN(4);
+
         it("Should properly change the workflow state", async function() {
             let result = await this.VotingInstance.startProposalsRegistering({from: owner});
             expect(await this.VotingInstance.workflowStatus.call()).to.be.bignumber.equal(startProposalRegisteringStatus);
@@ -186,6 +223,12 @@ contract("Voting", function(accounts) {
         it("Should Only be possible to change the workflow status in the right order", async function() {
             await this.VotingInstance.startProposalsRegistering({from: owner});
             await expectRevert(this.VotingInstance.startProposalsRegistering({from: owner}), 'Registering proposals cant be started now');
+            await expectRevert(this.VotingInstance.startVotingSession({from: owner}), 'Registering proposals phase is not finished');
+            await expectRevert(this.VotingInstance.endVotingSession({from: owner}), 'Voting session havent started yet');
+
+            await this.VotingInstance.endProposalsRegistering({from: owner});
+            await this.VotingInstance.startVotingSession({from: owner});
+            await expectRevert(this.VotingInstance.endProposalsRegistering({from: owner}), 'Registering proposals havent started yet');
         });
     });
 

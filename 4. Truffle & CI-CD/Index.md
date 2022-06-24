@@ -1,7 +1,10 @@
 #Smart contract Solidity & bonnes pratiques de sécurité
 
 ##Hypothèses
-Je n'ai pas fait de tests dédiés aux Getters car je m'en sers dans les tests des autres fonctions et ils fonctionnent correctement (je l'aurais fait en prod).
 
+J'ai choisi de tester chaque fonction du contract et les ai organisé de cette manière:
+- Un test regroupant toutes les assertions pour un cas nominal
+- Un test indépendant pour chaque cas déclenchant un "revert"
 
-Il en a de même pour les fonction de changement d'état de workflow. Je n'ai testé le revert que le la première.
+Pour les cas nominaux, j'ai fait plusieurs "expect" dans chaque test, je n'ai pas fait un test par porpriété par soucis de concision.
+
