@@ -56,7 +56,6 @@ contract("Voting", function(accounts) {
     describe("addVoter function", function() {
         it("Should correctly register a voter", async function() {
             const addingVoter = await this.VotingInstance.addVoter(voterAddress, {from: owner});
-
             const result = await this.VotingInstance.getVoter(voterAddress, {from:voterAddress});
 
             /* Assertions */
@@ -82,6 +81,13 @@ contract("Voting", function(accounts) {
 
             await expectRevert(addVoterFunction,'Already registered');
         });
+
+        it("Should only be executable by contract Owner", async function() {
+            const addingVoter = await this.VotingInstance.addVoter(voterAddress, {from: owner});
+
+            await expectRevert(this.VotingInstance.addVoter(voterAddress, {from: accounts[2]}),"Ownable: caller is not the owner");
+        });
+
     });
 
     describe("addProposal function", function() {
