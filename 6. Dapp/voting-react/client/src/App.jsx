@@ -4,19 +4,16 @@ import Setup from "./components/Setup";
 import Demo from "./components/Demo";
 import Footer from "./components/Footer";
 import "./App.css";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   return (
     <EthProvider>
       <div id="App" >
-        <div className="container">
-          <Intro />
-          <hr />
-          <Setup />
+        <div className="container-fluid">
+          <Dashboard />
           <hr />
           <Demo />
-          <hr />
-          <Footer />
         </div>
       </div>
     </EthProvider>

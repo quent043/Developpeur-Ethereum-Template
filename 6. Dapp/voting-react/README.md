@@ -1,40 +1,30 @@
-# React Truffle Box
+# Dapp Voting Project
 
-This box comes with everything you need to start using Truffle to write, compile, test, and deploy smart contracts, and interact with them from a React app.
+Projet d'application décentralisée de vote utilisant la box React de Truffle, devant permettre:
 
-## Installation
+- l’enregistrement d’une liste blanche d'électeurs.
+- à l'administrateur de commencer la session d'enregistrement de la proposition.
+- aux électeurs inscrits d’enregistrer leurs propositions.
+- à l'administrateur de mettre fin à la session d'enregistrement des propositions.
+- à l'administrateur de commencer la session de vote.
+- aux électeurs inscrits de voter pour leurs propositions préférées.
+- à l'administrateur de mettre fin à la session de vote.
+- à l'administrateur de comptabiliser les votes.
+- à tout le monde de consulter le résultat.
 
-First ensure you are in an empty directory.
+## sécurité
 
-Run the `unbox` command using 1 of 2 ways.
+Pour garantir la sécurité du smart contract contre les éventuelles attaques, les mesures suivantes ont été prises:
 
-```sh
-# Install Truffle globally and run `truffle unbox`
-$ npm install -g truffle
-$ truffle unbox react
-```
+- Pas de boucle for pour la comptabilisation des votes des proposals afin d'éviter une attaque DoS. 
+l'enregistrement de proposals par les voters n'êtant pas capée. La proposition gagnante est mise à jour à chaque vote via les variables "winningProposalID" et "maxVotes" (ex-aequo non pris en compte).
+- La variable "winningProposalID" n'est plus "public" afin d'en permettre la consultation qu'à la fin du vote.
 
-```sh
-# Alternatively, run `truffle unbox` via npx
-$ npx truffle unbox react
-```
+## Optimisation
 
-Start the react dev server.
+Afin de réduire au maximum la consommation en gas, les aménagements suivants ont été faits:
 
-```sh
-$ cd client
-$ npm start
-  Starting the development server...
-```
+- Groupement des Variables d'état "winningProposalID" et "maxVotes" en uint64, autorisant un nombre maximal de votes ou de proposals de (2**64) - 1, jugé suffisant.
+- Utilisation de "calldata" dans les arguments de fonctions
+- Changement de la variable "voteCount" du struct "Proposal" de uint256 = uint64, pour rester cohérent avec "maxVotes"
 
-From there, follow the instructions on the hosted React app. It will walk you through using Truffle and Ganache to deploy the `SimpleStorage` contract, making calls to it, and sending transactions to change the contract's state.
-
-## FAQ
-
-- __How do I use this with Ganache (or any other network)?__
-
-  The Truffle project is set to deploy to Ganache by default. If you'd like to change this, it's as easy as modifying the Truffle config file! Check out [our documentation on adding network configurations](https://trufflesuite.com/docs/truffle/reference/configuration/#networks). From there, you can run `truffle migrate` pointed to another network, restart the React dev server, and see the change take place.
-
-- __Where can I find more resources?__
-
-  This Box is a sweet combo of [Truffle](https://trufflesuite.com) and [Create React App](https://create-react-app.dev). Either one would be a great place to start!
