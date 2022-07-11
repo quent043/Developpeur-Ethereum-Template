@@ -4,6 +4,7 @@ import Title from "./Title";
 function UserDashboard({name}) {
     return (
         <Title name={name}/>
+
     );
 }
 

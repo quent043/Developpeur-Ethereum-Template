@@ -7,17 +7,13 @@ import "./App.css";
 import Dashboard from "./components/Dashboard";
 
 function App() {
-  return (
-    <EthProvider>
-      <div id="App" >
-        <div className="container-fluid">
-          <Dashboard />
-          <hr />
-          <Demo />
-        </div>
-      </div>
-    </EthProvider>
-  );
+    return (
+        <EthProvider>
+            {/*<div id="App" className="container-fluid" >*/}
+            <Dashboard />
+            {/*</div>*/}
+        </EthProvider>
+    );
 }
 
 export default App;

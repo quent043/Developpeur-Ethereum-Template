@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import useEth from "../../contexts/EthContext/useEth";
 import Title from "./Title";
 import * as PropTypes from "prop-types";
@@ -9,20 +9,34 @@ import NoticeWrongNetwork from "../Demo/NoticeWrongNetwork";
 
 
 const Dashboard = () => {
-    const { state: { artifact, web3, accounts, networkID, contract } } = useEth();
+    const {state: {accounts, contract}} = useEth();
     const [isAdmin, setIsAdmin] = useState(false);
-    const [loaded, setloaded] = useState(false);
+    const [loaded, setLoaded] = useState(false);
+    const [workflowStatus, setWorkflowStatus] = useState();
 
-    const checkAdmin = async () => {
-        setloaded(false);
-        await contract.methods.owner().call({from: accounts[0]}) === accounts[0] ? setIsAdmin(true) : setIsAdmin(false);
-        console.log("Quentin - isAdmin: ",isAdmin);
-        setloaded(true);
+    const init = async () => {
+        setLoaded(false);
+        if (contract) {
+            await contract.methods.owner().call({from: accounts[0]}) === accounts[0] ? setIsAdmin(true) : setIsAdmin(false);
+            // console.log("Quentin owner: ", await contract.methods.owner().call({from: accounts[0]}));
+            // console.log("Quentin account[0]: ", accounts[0]);
+            listenToWorkflowEvents();
+            setLoaded(true);
+        }
     }
 
-    useEffect( () => {
-        checkAdmin();
-    }, [contract, accounts])
+    useEffect(() => {
+        init();
+    }, [contract, accounts]);
+
+
+    const listenToWorkflowEvents = () => {
+        console.log("Quentin listener in index activated")
+            contract.events.WorkflowStatusChange().on("data", async (event) => {
+                console.log("Event Listener - Index WorkFlowStatus: ", event)
+                setWorkflowStatus(event);
+            })
+    };
 
 // return (
 //     {isAdmin &&
@@ -54,9 +68,10 @@ const Dashboard = () => {
     // }
 
     return (
-        loaded && <div className="dashboard">
+        loaded && <div>
             {
-                isAdmin ? <AdminDashboard /> : <UserDashboard name = {accounts[0]}/>
+                isAdmin ? <AdminDashboard accounts contract/> :
+                    <UserDashboard name={accounts[0]}/>
             }
         </div>
     );

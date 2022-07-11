@@ -1,0 +1,24 @@
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    /*flex-direction: row;*/
+}
+
+.flex-grow-0 {
+    display: flex;
+}
+
+h1 {
+    text-align: center;
+    font-size: 50px;
+    margin-bottom: 35px;
+}
+
+h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+button {
+    margin: 5px;
+}

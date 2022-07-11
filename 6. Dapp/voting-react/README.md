@@ -24,7 +24,7 @@ l'enregistrement de proposals par les voters n'êtant pas capée. La proposition
 
 Afin de réduire au maximum la consommation en gas, les aménagements suivants ont été faits:
 
-- Groupement des Variables d'état "winningProposalID" et "maxVotes" en uint64, autorisant un nombre maximal de votes ou de proposals de (2**64) - 1, jugé suffisant.
+- Groupement des Variables d'état "winningProposalID" et "maxVotes" en uint128, autorisant un nombre maximal de votes ou de proposals de (2**128) - 1, jugé suffisant.
 - Utilisation de "calldata" dans les arguments de fonctions
-- Changement de la variable "voteCount" du struct "Proposal" de uint256 = uint64, pour rester cohérent avec "maxVotes"
+- Changement de la variable "voteCount" du struct "Proposal" de uint256 = uint128, pour rester cohérent avec "maxVotes"
 
