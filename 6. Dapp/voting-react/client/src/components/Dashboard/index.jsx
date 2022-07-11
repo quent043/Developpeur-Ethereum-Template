@@ -11,36 +11,62 @@ import NoticeWrongNetwork from "../Demo/NoticeWrongNetwork";
 const Dashboard = () => {
     const {state: {accounts, contract}} = useEth();
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isVoter, setIsVoter] = useState(false);
     const [loaded, setLoaded] = useState(false);
-    const [account, setAccount] = useState(false);
+    // const [account, setAccount] = useState(false);
     const [workflowStatus, setWorkflowStatus] = useState();
     const [winningProposal, setWinningProposal] = useState();
     const [name, setName] = useState("");
 
     const init = async () => {
-        setLoaded(false);
-        if (contract) {
-            await contract.methods.owner().call({from: accounts[0]}) === accounts[0] ? setIsAdmin(true) : setIsAdmin(false);
-            setAccount(accounts[0]);
-            listenToWorkflowEvents();
-            _getWorkflowStatus();
-            setLoaded(true);
+        try {
+            setLoaded(false);
+            if (contract) {
+                let isAdmin = await contract.methods.owner().call({from: accounts[0]});
+                if(isAdmin === accounts[0]) {
+                    setName("Boss");
+                    setIsAdmin(true);
+                } else {
+                    try{
+                        let response = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
+                        if(response.isRegistered) {
+                            setName("User");
+                            setIsAdmin(false);
+                            setIsVoter(true);
+                        } else {
+                            setName("");
+                            setIsAdmin(false);
+                            setIsVoter(false);
+                        }
+                    } catch (err){
+                        console.log("Quentin - not a voter: ", err);
+                        setName("");
+                        setIsAdmin(false);
+                        setIsVoter(false);
+                    }
+                }
+                listenToWorkflowEvents();
+                _getWorkflowStatus();
+                setLoaded(true);
+            }
+        } catch (err) {
+            setName("");
+            setIsAdmin(false);
+            setIsVoter(false);
+            console.log("Quentin - err: ", err);
         }
     }
 
     useEffect(() => {
         init();
-
     }, [contract, accounts]);
 
     useEffect(() => {
         isAdmin ? setName("Boss") : setName("User");
-
     }, [isAdmin]);
 
 
     const _getWorkflowStatus = async () => {
-        console.log("Check")
         let status = await contract.methods.workflowStatus().call();
         setWorkflowStatus(status);
     }
@@ -53,10 +79,19 @@ const Dashboard = () => {
         }
     }
 
+    const checkIsVoter = async ()=>  {
+        try {
+            console.log("pas,admin", accounts[0])
+            let response = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
+            console.log("Quentin isVoter: ", response);
+            response.isRegistered ? setIsVoter(true) : setIsVoter(false);
+        } catch (err) {
+            setIsVoter(false);
+        }
+    }
+
     const listenToWorkflowEvents = () => {
-        // console.log("Quentin listener in index activated")
         contract.events.WorkflowStatusChange().on("data", async (event) => {
-            // console.log("Event Listener - Index WorkFlowStatus: ", event)
             setWorkflowStatus(event);
         })
     };
@@ -64,12 +99,11 @@ const Dashboard = () => {
     return (
         loaded &&
             <Fragment>
-                <Title account={name}/>
+                {(isVoter || isAdmin) && <Title name={name} isVoter={{isVoter}}/>}
                 <div className="container">
-                    {
-                        isAdmin ? <AdminDashboard account= {account} contract/> :
-                            <UserDashboard account= {account} contract/>
-                    }
+                    {isAdmin && <AdminDashboard account= {accounts[0]} contract/>}
+                    {isVoter && <UserDashboard account= {accounts[0]} contract/>}
+                    {(!isVoter && !isAdmin) && <h1>Not a voter</h1>}
                     {workflowStatus === "5" && <button className="btn btn-info" onClick={getWinningId}>Get Winning Proposal</button>}
                     {winningProposal &&
                         <div>Proposal {winningProposal.description} won with {winningProposal.voteCount} votes</div>}
@@ -77,6 +111,23 @@ const Dashboard = () => {
             </Fragment>
 
     );
+
+    // return (
+    //     loaded &&
+    //     <Fragment>
+    //         <Title account={name}/>
+    //         <div className="container">
+    //             {
+    //                 isAdmin ? <AdminDashboard account= {account} contract/> :
+    //                     <UserDashboard account= {account} contract/>
+    //             }
+    //             {workflowStatus === "5" && <button className="btn btn-info" onClick={getWinningId}>Get Winning Proposal</button>}
+    //             {winningProposal &&
+    //                 <div>Proposal {winningProposal.description} won with {winningProposal.voteCount} votes</div>}
+    //         </div>
+    //     </Fragment>
+    //
+    // );
 }
 
 

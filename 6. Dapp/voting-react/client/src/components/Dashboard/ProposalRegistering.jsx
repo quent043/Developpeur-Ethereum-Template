@@ -17,7 +17,6 @@ export const ProposalRegistering = (props) => {
         let status = await contract.methods.workflowStatus().call();
         setWorkflowStatus(status);
     }
-    console.log("WorkFlow", workflowStatus);
 
     const handleClick = () => {
         _registerProposal(proposalDescription.current.value);

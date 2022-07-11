@@ -24,7 +24,6 @@ function AdminDashboard({account}) {
     const _getWorkflowStatus = async () => {
         let status = await contract.methods.workflowStatus().call();
         setWorkflowStatus(status);
-        console.log(workflowStatus);
     }
 
     const handleClick = () => {
