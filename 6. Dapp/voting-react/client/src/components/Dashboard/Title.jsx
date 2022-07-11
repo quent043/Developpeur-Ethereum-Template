@@ -1,8 +1,8 @@
 import React from 'react';
 
-function Title({name}) {
+function Title({account}) {
         return (
-            <h1>Welcome {name}</h1>
+            <h1>Welcome {account}</h1>
         )
 }
 
