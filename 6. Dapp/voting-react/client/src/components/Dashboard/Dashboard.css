@@ -22,3 +22,31 @@ h3 {
 button {
     margin: 5px;
 }
+
+.box {
+    text-align: center;
+    font-size: 30px;
+    background-color: lightgray;
+    border-radius: 10px;
+    padding: 8px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table > tr > th {
+    font-size: 20px;
+}
+
+.title-block {
+    padding: 5px;
+    margin-bottom: 45px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 5px #1266cc;
+    width: fit-content;
+}
+
+.workflow-manager {
+    margin-bottom: 10px;
+}

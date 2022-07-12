@@ -1,30 +1,27 @@
 import React, {Fragment, useState, useEffect, useRef} from 'react';
 
-import Title from "./Title";
-import useEth from "../../contexts/EthContext/useEth";
 import WorkflowChanger from "./WorkflowChanger";
 import "./Dashboard.css";
+import VotersTable from "./VotersTable";
 
-function AdminDashboard({account}) {
-    const { state: { accounts, contract } } = useEth();
-    const [workflowStatus, setWorkflowStatus] = useState();
+function AdminDashboard({account, workflowStatus, contract}) {
     const [errorMessage, setErrorMessage] = useState();
     const [winningProposal, setWinningProposal] = useState();
+    const [voters, setVoters] = useState([""]);
     const inputEthAddress = useRef(null);
 
 
     useEffect(() => {
-        listenToVoterRegisteredEvent();
-        _getWorkflowStatus();
-
+        getVoters();
+        // _getWorkflowStatus();
         return () => {
         };
     }, []);
 
-    const _getWorkflowStatus = async () => {
-        let status = await contract.methods.workflowStatus().call();
-        setWorkflowStatus(status);
-    }
+    // const _getWorkflowStatus = async () => {
+    //     let status = await contract.methods.workflowStatus().call();
+    //     setWorkflowStatus(status);
+    // }
 
     const handleClick = () => {
         _registerVoter(inputEthAddress.current.value);
@@ -34,6 +31,7 @@ function AdminDashboard({account}) {
         console.log(voterAddress);
         try {
             await contract.methods.addVoter(voterAddress).send({from: account});
+            getVoters();
 
         } catch (err) {
             console.log(err);
@@ -74,7 +72,7 @@ function AdminDashboard({account}) {
             setErrorMessage(err.code);
         }
         finally {
-            await _getWorkflowStatus()
+            // await _getWorkflowStatus()
         }
 
     };
@@ -94,44 +92,47 @@ function AdminDashboard({account}) {
         })
     };
 
-    //TODO: ADD KILL LISTENER IN ON DESTROY
+    const getVoters = async () => {
+        let options = {
+            fromBlock: 0,
+            toBlock: "latest"
+        }
 
+        const contractEvents = await contract.getPastEvents("VoterRegistered",  options);
+        let voters = [];
+        contractEvents.forEach(element => {
+            voters.push(element.returnValues._voterAddress);
+        });
+        setVoters(voters);
+    }
 
-    // Get proposal list ===> Possibility to vote
-    // Listen to events => Alerts
 
     return (
         <Fragment>
-                <div className="">
+                {workflowStatus === "0" &&
                     <div>
-                        <p>WorkFlow status : {workflowStatus}</p>
-                    </div>
-
-                    {workflowStatus === "0" && <div>
-                        <h3>Add a voter:</h3>
-                        <div className="input-group mb-3">
-                            <input type="text" className="form-control"
-                                   ref={inputEthAddress}
-                                   placeholder="Voter's ETH Address"
-                                   id="ethAddress"
-                                   aria-label="Voter's ETH Address"
-                                   aria-describedby="basic-addon2"
-                            />
-                            <div className="input-group-append">
-                                <button className="btn btn-outline-secondary" onClick={handleClick}
-                                        type="button">Add
-                                </button>
-                            </div>
+                    <h3>Add a voter:</h3>
+                    <div className="input-group mb-3">
+                        <input type="text" className="form-control"
+                               ref={inputEthAddress}
+                               placeholder="Voter's ETH Address"
+                               id="ethAddress"
+                               aria-label="Voter's ETH Address"
+                               aria-describedby="basic-addon2"
+                        />
+                        <div className="input-group-append">
+                            <button className="btn btn-outline-secondary" onClick={handleClick}
+                                    type="button">Add
+                            </button>
                         </div>
-                    </div>}
-                    {/*<button className="btn btn-info" onClick={_getWorkflowStatus}>GetWorkflowStatus</button>*/}
+                    </div>
                 </div>
-                <div className="input-group mb-3">
-                    <WorkflowChanger handleWorkflowChange = {handleWorkflowChange} />
-                </div>
-                {/*{errorMessage && <div>*/}
-                {/*    <p>Error: + {errorMessage}</p>*/}
-                {/*</div>}*/}
+                }
+            <WorkflowChanger handleWorkflowChange = {handleWorkflowChange} workflowStatus = {workflowStatus} />
+            <VotersTable voters={voters}/>
+            {/*{errorMessage && <div>*/}
+            {/*    <p>Error: + {errorMessage}</p>*/}
+            {/*</div>}*/}
         </Fragment>
     );
 }

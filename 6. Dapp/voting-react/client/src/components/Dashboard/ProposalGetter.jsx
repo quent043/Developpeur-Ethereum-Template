@@ -15,6 +15,12 @@ function ProposalGetter({account, workFlowStatus, contract}) {
         }
     }
 
+    getEvents();
+    const getEvents = async ()=> {
+        const contractEvents = await contract.getPastEvents("dataStored");
+        console.log("Events ", contractEvents);
+    }
+
     return (
         <Fragment>
             <div>
