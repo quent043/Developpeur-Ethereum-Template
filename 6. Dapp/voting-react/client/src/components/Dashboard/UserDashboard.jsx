@@ -20,11 +20,11 @@ function UserDashboard({account, contract, workflowStatus}) {
     // }
 //TODO Tenter ici la même logique que "index". On met ici
     return (
-        <Fragment>
+        <div className="container">
             {workflowStatus === "1" && <ProposalRegistering contract={contract} account ={account} workflowStatus ={workflowStatus}/>}
             {workflowStatus === "3" && <VotingModule account ={account}/>}
-            {workflowStatus !== "0" && <ProposalGetter account ={account} workFlowStatus ={workflowStatus} contract={contract}/>}
-        </Fragment>
+            {/*{workflowStatus !== "0" && <ProposalGetter account ={account} workFlowStatus ={workflowStatus} contract={contract}/>}*/}
+        </div>
     );
 }
 

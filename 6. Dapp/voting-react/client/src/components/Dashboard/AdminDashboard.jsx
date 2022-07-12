@@ -2,7 +2,7 @@ import React, {Fragment, useState, useEffect, useRef} from 'react';
 
 import WorkflowChanger from "./WorkflowChanger";
 import "./Dashboard.css";
-import VotersTable from "./VotersTable";
+import Table from "./Table";
 import AddVoters from "./AddVoters";
 
 function AdminDashboard({account, workflowStatus, contract}) {
@@ -29,7 +29,6 @@ function AdminDashboard({account, workflowStatus, contract}) {
     }
 
     const _registerVoter = async (voterAddress) => {
-        console.log(voterAddress);
         try {
             await contract.methods.addVoter(voterAddress).send({from: account});
             getVoters();
@@ -112,7 +111,7 @@ function AdminDashboard({account, workflowStatus, contract}) {
         <Fragment>
             {workflowStatus === "0" && <AddVoters handleClick = {handleClick} />}
             <WorkflowChanger handleWorkflowChange = {handleWorkflowChange} workflowStatus = {workflowStatus} />
-            {voters && <VotersTable voters={voters}/>}
+            {voters && <Table items={voters} title="Registered Voters"/>}
         </Fragment>
     );
 }

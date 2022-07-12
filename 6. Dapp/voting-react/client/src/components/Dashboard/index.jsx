@@ -25,6 +25,7 @@ const Dashboard = () => {
     const [name, setName] = useState("");
 
     const init = async () => {
+        console.log("Init");
         try {
             setLoaded(false);
             if (contract) {
@@ -98,10 +99,8 @@ const Dashboard = () => {
             {(isVoter || isAdmin) &&
                 <TitleBlock name={name} isVoter={isVoter} workflowStatus={workflowStatus} />}
             <div className="container">
-                {isAdmin &&
-                    <AdminDashboard account={accounts[0]} contract={contract}
-                                    workflowStatus={workflowStatus}/>}
-                {isVoter && <UserDashboard account={accounts[0]} contract={contract} workflowStatus={workflowStatus}/>}
+                {isAdmin && <AdminDashboard account={accounts[0]} contract={contract} workflowStatus={workflowStatus}/>}
+                {(isVoter && !isAdmin) && <UserDashboard account={accounts[0]} contract={contract} workflowStatus={workflowStatus}/>}
                 {(!isVoter && !isAdmin) && <h1>Not a voter</h1>}
                 {workflowStatus === "5" && <button className="btn btn-info" onClick={getWinningId}>Get Winning Proposal</button>}
                 {winningProposal && <div>Proposal {winningProposal.description} won with {winningProposal.voteCount} votes</div>}

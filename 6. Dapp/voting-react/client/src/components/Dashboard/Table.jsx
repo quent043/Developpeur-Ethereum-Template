@@ -1,17 +1,17 @@
 import React, {Fragment} from 'react';
 import './Dashboard.css'
 
-function VotersTable({voters}) {
+function Table({items, title}) {
     return (
         <Fragment>
             <table className="table voter-table">
                 <thead>
                 <tr>
-                    <th scope="col">Registered Voters</th>
+                    <th scope="col">{title}</th>
                 </tr>
                 </thead>
                 <tbody>
-                {voters.map((voter, index) => (
+                {items.map((voter, index) => (
                         <tr key={index}>
                             <td>{voter}</td>
                         </tr>
@@ -23,4 +23,4 @@ function VotersTable({voters}) {
     );
 }
 
-export default VotersTable;
+export default Table;

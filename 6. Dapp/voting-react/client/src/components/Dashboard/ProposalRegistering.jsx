@@ -1,4 +1,5 @@
 import React, {Fragment, useState, useEffect, useRef} from 'react';
+import Table from "./Table";
 
 export const ProposalRegistering = ({account, contract, workflowStatus}) => {
     const proposalDescription = useRef(null);
@@ -33,7 +34,7 @@ export const ProposalRegistering = ({account, contract, workflowStatus}) => {
         }
 
         const contractEvents = await contract.getPastEvents("ProposalRegistered",  options);
-        console.log(contractEvents);
+        console.log("Contract Events - ProposalRegistering: ", contractEvents);
         let proposalsIds = [];
         contractEvents.forEach(element => {
 
@@ -45,7 +46,7 @@ export const ProposalRegistering = ({account, contract, workflowStatus}) => {
             const proposal = await contract.methods.getOneProposal(proposalId).call({from: account});
             proposals.push(proposal.description);
         }
-        console.log(proposals);
+        console.log("Proposals - ProposalRegistering ", proposals);
         setProposals(proposals);
 
     }
@@ -73,7 +74,7 @@ export const ProposalRegistering = ({account, contract, workflowStatus}) => {
                         </div>
 
                     </div>}
-
+            <Table items={proposals} title="Proposals:" />
 
             </div>
         </Fragment>
