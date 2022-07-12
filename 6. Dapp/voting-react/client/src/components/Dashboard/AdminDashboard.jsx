@@ -3,6 +3,7 @@ import React, {Fragment, useState, useEffect, useRef} from 'react';
 import WorkflowChanger from "./WorkflowChanger";
 import "./Dashboard.css";
 import VotersTable from "./VotersTable";
+import AddVoters from "./AddVoters";
 
 function AdminDashboard({account, workflowStatus, contract}) {
     const [errorMessage, setErrorMessage] = useState();
@@ -23,8 +24,8 @@ function AdminDashboard({account, workflowStatus, contract}) {
     //     setWorkflowStatus(status);
     // }
 
-    const handleClick = () => {
-        _registerVoter(inputEthAddress.current.value);
+    const handleClick = (data) => {
+        _registerVoter(data);
     }
 
     const _registerVoter = async (voterAddress) => {
@@ -109,30 +110,9 @@ function AdminDashboard({account, workflowStatus, contract}) {
 
     return (
         <Fragment>
-                {workflowStatus === "0" &&
-                    <div>
-                    <h3>Add a voter:</h3>
-                    <div className="input-group mb-3">
-                        <input type="text" className="form-control"
-                               ref={inputEthAddress}
-                               placeholder="Voter's ETH Address"
-                               id="ethAddress"
-                               aria-label="Voter's ETH Address"
-                               aria-describedby="basic-addon2"
-                        />
-                        <div className="input-group-append">
-                            <button className="btn btn-outline-secondary" onClick={handleClick}
-                                    type="button">Add
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                }
+            {workflowStatus === "0" && <AddVoters handleClick = {handleClick} />}
             <WorkflowChanger handleWorkflowChange = {handleWorkflowChange} workflowStatus = {workflowStatus} />
-            <VotersTable voters={voters}/>
-            {/*{errorMessage && <div>*/}
-            {/*    <p>Error: + {errorMessage}</p>*/}
-            {/*</div>}*/}
+            {voters && <VotersTable voters={voters}/>}
         </Fragment>
     );
 }

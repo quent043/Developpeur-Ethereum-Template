@@ -1,31 +1,23 @@
 import React, {Fragment, useState, useEffect, useRef} from 'react';
-import useEth from "../../contexts/EthContext/useEth";
 
-export const ProposalRegistering = (props) => {
-    const { state: { artifact, web3, accounts, networkID, contract } } = useEth();
+export const ProposalRegistering = ({account, contract, workflowStatus}) => {
     const proposalDescription = useRef(null);
-    const [workflowStatus, setWorkflowStatus] = useState();
+    const [proposals, setProposals] = useState([]);
 
     useEffect(() => {
-        _getWorkflowStatus();
-
         return () => {
+            getProposalEvents();
         };
     }, []);
 
-    const _getWorkflowStatus = async () => {
-        let status = await contract.methods.workflowStatus().call();
-        setWorkflowStatus(status);
-    }
 
     const handleClick = () => {
         _registerProposal(proposalDescription.current.value);
     }
 
     const _registerProposal = async (description) => {
-        console.log(description);
         try {
-            await contract.methods.addProposal(description).send({from: accounts[0]});
+            await contract.methods.addProposal(description).send({from: account});
 
         } catch (err) {
             console.log(err);
@@ -34,13 +26,35 @@ export const ProposalRegistering = (props) => {
         }
     }
 
+    const getProposalEvents = async () => {
+        let options = {
+            fromBlock: 0,
+            toBlock: "latest"
+        }
+
+        const contractEvents = await contract.getPastEvents("ProposalRegistered",  options);
+        console.log(contractEvents);
+        let proposalsIds = [];
+        contractEvents.forEach(element => {
+
+            proposalsIds.push(element.returnValues._proposalId);
+        });
+
+        let proposals = [];
+        for (const proposalId of proposalsIds) {
+            const proposal = await contract.methods.getOneProposal(proposalId).call({from: account});
+            proposals.push(proposal.description);
+        }
+        console.log(proposals);
+        setProposals(proposals);
+
+    }
+
     return (
         <Fragment>
-            <div className="container grid-container">
+            <div className="container flex-container">
+                {workflowStatus === "1" &&
                     <div>
-                        <p>WorkFlow status : {workflowStatus}</p>
-                    </div>
-                    {workflowStatus === "1" && <div>
                         <h3>Add a Proposal:</h3>
                         <div className="input-group mb-3">
                             <input type="text" className="form-control"
@@ -57,7 +71,10 @@ export const ProposalRegistering = (props) => {
                                 </button>
                             </div>
                         </div>
-                </div>}
+
+                    </div>}
+
+
             </div>
         </Fragment>
     );

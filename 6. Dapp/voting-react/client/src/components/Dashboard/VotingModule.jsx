@@ -61,7 +61,7 @@ function VotingModule({account}) {
 
     return (
         <Fragment>
-            <div className="container grid-container">
+            <div className="container fklex-container">
                 <div>
                     <h3>Vote for a proposal:</h3>
                     <p>WorkFlow status : {workflowStatus}</p>

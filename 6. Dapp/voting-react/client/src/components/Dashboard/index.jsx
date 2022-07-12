@@ -8,6 +8,11 @@ import NoticeNoArtifact from "../Demo/NoticeNoArtifact";
 import NoticeWrongNetwork from "../Demo/NoticeWrongNetwork";
 import TitleBlock from "./TitleBlock";
 
+//TODO: OnClick chaque assress = détail vote
+//TODO: Refactor components
+//TODO: Add TU?
+//TODO: Proposal List
+//TODO: Généraliser Voters Table
 
 const Dashboard = () => {
     const {state: {accounts, contract}} = useEth();

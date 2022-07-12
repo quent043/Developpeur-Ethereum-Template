@@ -1,7 +1,11 @@
-import React, {Fragment, useState, useEffect, useRef} from 'react';
+import React, {useRef} from 'react';
 
-function AddVoters(props) {
+function AddVoters({handleClick}) {
+    const inputEthAddress = useRef(null);
 
+    const onClick = () => {
+        handleClick(inputEthAddress.current.value);
+    }
 
     return (
         <div>
@@ -15,7 +19,7 @@ function AddVoters(props) {
                        aria-describedby="basic-addon2"
                 />
                 <div className="input-group-append">
-                    <button className="btn btn-outline-secondary" onClick={handleClick}
+                    <button className="btn btn-outline-secondary" onClick={onClick}
                             type="button">Add
                     </button>
                 </div>

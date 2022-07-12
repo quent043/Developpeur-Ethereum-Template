@@ -4,7 +4,7 @@ import './Dashboard.css'
 function VotersTable({voters}) {
     return (
         <Fragment>
-            <table className="table">
+            <table className="table voter-table">
                 <thead>
                 <tr>
                     <th scope="col">Registered Voters</th>
@@ -12,8 +12,8 @@ function VotersTable({voters}) {
                 </thead>
                 <tbody>
                 {voters.map((voter, index) => (
-                        <tr>
-                            <td key={index}>{voter}</td>
+                        <tr key={index}>
+                            <td>{voter}</td>
                         </tr>
                     )
                 )}

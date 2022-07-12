@@ -1,7 +1,8 @@
-.grid-container {
-    display: grid;
-    grid-template-columns: auto auto;
+.flex-container {
+    /*display: grid;*/
+    /*grid-template-columns: auto auto;*/
     /*flex-direction: row;*/
+    display: flex;
 }
 
 .flex-grow-0 {
@@ -34,7 +35,7 @@ button {
     margin-right: auto;
 }
 
-table > tr > th {
+.voter-table tr > th {
     font-size: 20px;
 }
 
@@ -49,4 +50,12 @@ table > tr > th {
 
 .workflow-manager {
     margin-bottom: 10px;
+}
+
+.voter-table {
+    max-width: fit-content;
+    /*margin-right: auto;*/
+    margin-top: 50px;
+    border-top: 5px ;
+    border: 5px grey;
 }
