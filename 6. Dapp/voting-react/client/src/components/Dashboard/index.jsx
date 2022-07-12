@@ -29,6 +29,7 @@ const Dashboard = () => {
                 } else {
                     try{
                         let response = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
+                        console.log(response);
                         if(response.isRegistered) {
                             setName("User");
                             setIsAdmin(false);
@@ -76,17 +77,6 @@ const Dashboard = () => {
             let winningProposal =  await contract.methods.getWinningProposal().call();
             console.log(winningProposal);
             setWinningProposal(winningProposal);
-        }
-    }
-
-    const checkIsVoter = async ()=>  {
-        try {
-            console.log("pas,admin", accounts[0])
-            let response = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
-            console.log("Quentin isVoter: ", response);
-            response.isRegistered ? setIsVoter(true) : setIsVoter(false);
-        } catch (err) {
-            setIsVoter(false);
         }
     }
 

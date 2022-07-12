@@ -1,8 +1,8 @@
 import React, {Fragment, useEffect, useState} from 'react';
-import Title from "./Title";
 import {ProposalRegistering} from "./ProposalRegistering";
 import useEth from "../../contexts/EthContext/useEth";
 import VotingModule from "./VotingModule";
+import ProposalGetter from "./ProposalGetter";
 
 function UserDashboard({account}) {
     const { state: { accounts, contract } } = useEth();
@@ -10,7 +10,6 @@ function UserDashboard({account}) {
 
     useEffect(() => {
         _getWorkflowStatus();
-
         return () => {
         };
     }, []);
@@ -24,6 +23,7 @@ function UserDashboard({account}) {
         <Fragment>
             {workflowStatus === "1" && <ProposalRegistering contract account ={account}/>}
             {workflowStatus === "3" && <VotingModule account ={account}/>}
+            {workflowStatus !== "0" && <ProposalGetter account ={account} workFlowStatus ={workflowStatus} contract={contract}/>}
         </Fragment>
     );
 }
