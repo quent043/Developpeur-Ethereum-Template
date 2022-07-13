@@ -1,5 +1,5 @@
-import React, {Fragment, useState, useEffect, useRef} from 'react';
-import Table from "./Table";
+import React, {Fragment, useEffect} from 'react';
+import {toast} from "react-toastify";
 
 function VotingModule({account, contract, proposals, voter}) {
 
@@ -10,19 +10,15 @@ function VotingModule({account, contract, proposals, voter}) {
     }, []);
 
 
-    const handleClick = (proposalId) => {
-        _registerProposal(proposalId);
+    const handleClick = async (proposalId) => {
+        await _registerProposal(proposalId);
     }
 
     const _registerProposal = async (id) => {
-        console.log(id);
         try {
-            let response = await contract.methods.setVote(id).send({from: account});
-            console.log("Quentin response: ",response.events.voted);
+            await contract.methods.setVote(id).send({from: account});
         } catch (err) {
-            console.log(err);
-            console.error("Contract Error: ", err.code);
-            // setErrorMessage(err.code);
+            toast.error("Error connecting to the blockchain");
         }
     }
 
@@ -40,7 +36,6 @@ function VotingModule({account, contract, proposals, voter}) {
                         </div>
                     </div>
                 ))}
-
             </div>
         </Fragment>
     );

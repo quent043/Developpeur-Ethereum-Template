@@ -1,6 +1,5 @@
-import React, {useState, useEffect, Fragment} from 'react';
+import React, {useState, useEffect} from 'react';
 import Title from "./Title";
-import {WorkflowStatus} from './WorkflowChanger';
 
 function TitleBlock({name, isVoter, workflowStatus}) {
     const [workflowName, setWorkflowName] = useState();

@@ -13,9 +13,9 @@ function Table({items, title, style}) {
                 </tr>
                 </thead>
                 <tbody>
-                {items.map((voter, index) => (
+                {items.map((item, index) => (
                         <tr key={index}>
-                            <td>{voter}</td>
+                            <td>{item}</td>
                         </tr>
                     )
                 )}

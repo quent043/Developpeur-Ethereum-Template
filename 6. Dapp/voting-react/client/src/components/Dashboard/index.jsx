@@ -5,11 +5,12 @@ import UserDashboard from "./UserDashboard";
 import TitleBlock from "./TitleBlock";
 import WinningProposalButton from "./WinningProposalButton";
 import NotAVoterPage from "./NotAVoterPage";
+import {toast} from "react-toastify";
 
-//TODO: OnClick chaque assress = détail vote
-//TODO: Refactor components
 //TODO: Add TU?
+//TODO: Augmenter Font?
 //TODO: Check si le owner est aussi voter
+//TODO: Rajouter le _ aux fonctions web3
 
 const Dashboard = () => {
     const {state: {accounts, contract}} = useEth();
@@ -20,44 +21,51 @@ const Dashboard = () => {
     const [workflowStatus, setWorkflowStatus] = useState();
     const [name, setName] = useState("");
 
+    const setAdminProfile = () => {
+        setName("Boss");
+        setIsAdmin(true);
+    }
+
+    const setVoterProfile = (voter) => {
+        setVoter(voter);
+        setName("User");
+        setIsAdmin(false);
+        setIsVoter(true);
+    }
+
+    const setNonVoterProfile = () => {
+        setName("");
+        setIsAdmin(false);
+        setIsVoter(false);
+    }
+
     const init = async () => {
         try {
             setLoaded(false);
             if (contract) {
                 let owner = await contract.methods.owner().call({from: accounts[0]});
                 if (owner === accounts[0]) {
-                    setName("Boss");
-                    setIsAdmin(true);
+                    setAdminProfile();
                 } else {
                     try {
                         let voter = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
                         if (voter.isRegistered) {
-                            setVoter(voter);
-                            setName("User");
-                            setIsAdmin(false);
-                            setIsVoter(true);
+                            setVoterProfile(voter);
                         } else {
-                            setName("");
-                            setIsAdmin(false);
-                            setIsVoter(false);
+                            setNonVoterProfile();
                         }
                     } catch (err) {
-                        console.log("Quentin - not a voter: ", err);
-                        setName("");
-                        setIsAdmin(false);
-                        setIsVoter(false);
+                        setNonVoterProfile()
                     }
                 }
                 listenToWorkflowEvents();
                 listenToVotingEvents();
-                _getWorkflowStatus();
+                await getWorkflowStatus();
                 setLoaded(true);
             }
         } catch (err) {
-            setName("");
-            setIsAdmin(false);
-            setIsVoter(false);
-            console.log("Quentin - err: ", err);
+            setNonVoterProfile();
+            toast.error("Error connecting to the blockchain")
         }
     }
 
@@ -65,14 +73,17 @@ const Dashboard = () => {
         init();
     }, [contract, accounts]);
 
-    useEffect(() => {
-        isAdmin ? setName("Boss") : setName("User");
-    }, [isAdmin]);
+    // useEffect(() => {
+    //     isAdmin ? setName("Boss") : setName("User");
+    // }, [isAdmin]);
 
-
-    const _getWorkflowStatus = async () => {
-        let status = await contract.methods.workflowStatus().call();
-        setWorkflowStatus(status);
+    const getWorkflowStatus = async () => {
+        try {
+            let status = await contract.methods.workflowStatus().call();
+            setWorkflowStatus(status);
+        } catch (err) {
+            toast.error("Error connecting to the blockchain");
+        }
     }
 
     const listenToWorkflowEvents = () => {
@@ -82,15 +93,19 @@ const Dashboard = () => {
     };
 
     const listenToVotingEvents = () => {
-        contract.events.Voted().on("data", async (event) => {
-            let response = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
-            setVoter(response);
+        contract.events.Voted().on("data", async () => {
+            try {
+                let response = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
+                setVoter(response);
+            } catch (err) {
+                toast.error("Error connecting to the blockchain");
+            }
         })
     };
 
     return (
         loaded &&
-        <Fragment>
+        <div className="title-block-background container">
             {(isVoter || isAdmin) &&
                 <TitleBlock name={name} isVoter={isVoter} workflowStatus={workflowStatus} />}
             <div className="container">
@@ -99,7 +114,7 @@ const Dashboard = () => {
                 {(!isVoter && !isAdmin) && <NotAVoterPage />}
                 <WinningProposalButton workflowStatus={workflowStatus} contract={contract} />
             </div>
-        </Fragment>
+        </div>
 
     );
 }

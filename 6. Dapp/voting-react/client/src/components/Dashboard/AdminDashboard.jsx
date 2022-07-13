@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import WorkflowChanger from "./WorkflowChanger";
 import "./Dashboard.css";
@@ -7,10 +7,7 @@ import AddVoters from "./AddVoters";
 import {toast} from "react-toastify";
 
 function AdminDashboard({account, workflowStatus, contract}) {
-    const [errorMessage, setErrorMessage] = useState();
-    const [winningProposal, setWinningProposal] = useState();
     const [voters, setVoters] = useState();
-    const inputEthAddress = useRef(null);
 
 
     useEffect(() => {
@@ -29,9 +26,7 @@ function AdminDashboard({account, workflowStatus, contract}) {
             await contract.methods.addVoter(voterAddress).send({from: account});
             getVoters();
         } catch (err) {
-            console.log(err);
-            console.error("Contract Error: ", err.code);
-            setErrorMessage(err.code);
+            toast.error("Error connecting to the blockchain");
         }
     }
 
@@ -66,28 +61,8 @@ function AdminDashboard({account, workflowStatus, contract}) {
                     break;
             }
         } catch (err) {
-            console.error("Error in workflow change: ", err.code);
-            setErrorMessage(err.code);
+            toast.error("Error in workflow change: ", err.code);
         }
-        finally {
-            // await _getWorkflowStatus()
-        }
-
-    };
-
-    const getWinningId = async () => {
-        if (workflowStatus === "5") {
-            let winningProposal =  await contract.methods.getWinningProposal().call();
-            console.log(winningProposal);
-            setWinningProposal(winningProposal);
-        }
-    }
-
-    const listenToVoterRegisteredEvent = () => {
-        contract.events.VoterRegistered().on("data", async (event) => {
-            console.log("Event Listener - Voter Registered: ", event)
-            alert("Voter " + event + "Successfully added");
-        })
     };
 
     const getVoters = async () => {

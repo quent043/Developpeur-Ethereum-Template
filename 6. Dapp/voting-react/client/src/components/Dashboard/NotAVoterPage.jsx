@@ -1,6 +1,6 @@
 import React from 'react';
 
-function NotAVoterPage(props) {
+function NotAVoterPage() {
     return (
         <div className="title-block">
             <h1>Not a voter</h1>

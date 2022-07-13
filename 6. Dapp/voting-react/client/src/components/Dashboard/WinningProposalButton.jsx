@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {toast} from "react-toastify";
 
 function WinningProposalButton({workflowStatus, contract}) {
     const [winningProposal, setWinningProposal] = useState();
@@ -8,11 +9,9 @@ function WinningProposalButton({workflowStatus, contract}) {
         if (workflowStatus === "5") {
             try {
                 let winningProposal = await contract.methods.getWinningProposal().call();
-                console.log(winningProposal);
-                setWinningProposal(winningProposal);
-                setErrorMessage(null);
+                (winningProposal.voteCount === "0") ? setErrorMessage("Nobody voted, no proposal won") : setWinningProposal(winningProposal);
             } catch (err) {
-                console.log("Err ", err)
+                toast.error("Error connecting to the blockchain");
                 setWinningProposal(null);
                 setErrorMessage("Nobody voted, no proposal won");
             }
@@ -20,7 +19,7 @@ function WinningProposalButton({workflowStatus, contract}) {
     }
 
     return (
-        <div className="title-block">
+        <div className="winning-btn-block">
             {workflowStatus === "5" &&
                 <button className="btn btn-info btn-winner" onClick={getWinningId}>Get Winning Proposal</button>}
             {winningProposal && <h3>Proposal {winningProposal.description} won with {winningProposal.voteCount} votes</h3>}

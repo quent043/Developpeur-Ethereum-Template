@@ -1,5 +1,4 @@
-import React, {Fragment, useState, useEffect, useRef} from 'react';
-import useEth from "../../contexts/EthContext/useEth";
+import React from 'react';
 import {Button} from "react-bootstrap";
 
 export const WorkflowStatus = {
@@ -11,7 +10,6 @@ export const WorkflowStatus = {
 }
 
 const WorkflowChanger = ({ handleWorkflowChange, workflowStatus }) => {
-
 
     return (
             <div className="workflow-manager flex-column flex-container">
