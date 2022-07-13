@@ -152,4 +152,8 @@ hr {
   text-align: center;
 }
 
+.Toastify__toast-body {
+  font-size: 20px;
+}
+
 

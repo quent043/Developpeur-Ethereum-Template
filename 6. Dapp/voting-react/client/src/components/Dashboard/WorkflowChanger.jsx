@@ -14,7 +14,7 @@ const WorkflowChanger = ({ handleWorkflowChange, workflowStatus }) => {
 
 
     return (
-            <div className="workflow-manager">
+            <div className="workflow-manager flex-column flex-container">
                 <h2>Workflow Manager</h2>
                 <Button disabled={workflowStatus !== "0"} variant="primary" size="lg" onClick={() => handleWorkflowChange(WorkflowStatus[0])}>
                     Init Proposal Registration

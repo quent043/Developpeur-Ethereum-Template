@@ -1,12 +1,17 @@
 .flex-container {
-    /*display: grid;*/
-    /*grid-template-columns: auto auto;*/
-    /*flex-direction: row;*/
     display: flex;
+    justify-content: space-evenly;
+    align-content: flex-start;
+    margin-bottom: 20px;
 }
 
 .flex-grow-0 {
     display: flex;
+}
+
+.flex-item-align-top {
+    align-self: baseline;
+    margin-top: 0;
 }
 
 h1 {
@@ -37,6 +42,7 @@ button {
 
 .table tr > th {
     font-size: 20px;
+    border-top: none;
 }
 
 .title-block {
@@ -51,12 +57,14 @@ button {
 
 .workflow-manager {
     margin-bottom: 10px;
+    flex-grow: 1;
+    max-width: 20%;
 }
 
 .voter-table {
     max-width: fit-content;
     /*margin-right: auto;*/
-    margin-top: 50px;
+    /*margin-top: 50px;*/
     border: 5px grey;
 }
 
@@ -68,9 +76,9 @@ button {
     border: 5px grey;
 }
 
-.proposals-table > thead > tr > th {
-    border-top: none !important;
-}
+/*.proposals-table > thead > tr > th {*/
+/*    border-top: none !important;*/
+/*}*/
 
 .proposals-table-centered {
     flex-grow: 1;
@@ -99,7 +107,7 @@ button {
     margin-top: 30px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-evenly;
 }
 
 .voting-btn {
@@ -111,4 +119,12 @@ button {
 .proposal-card-title {
     font-size: 20px;
     text-align: center;
+}
+
+.btn-winner{
+    padding: .8rem 2rem;
+    font-size: 2rem;
+    line-height: 1.5;
+    border-radius: .3rem;
+    margin-bottom: 20px;
 }

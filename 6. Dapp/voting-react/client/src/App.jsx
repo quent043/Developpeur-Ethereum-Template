@@ -1,17 +1,15 @@
-import { EthProvider } from "./contexts/EthContext";
-import Intro from "./components/Intro/";
-import Setup from "./components/Setup";
-import Demo from "./components/Demo";
-import Footer from "./components/Footer";
-import "./App.css";
+import {EthProvider} from "./contexts/EthContext";
 import Dashboard from "./components/Dashboard";
+import {ToastContainer} from "react-toastify";
+import "./App.css";
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
     return (
         <EthProvider>
-            {/*<div id="App" className="container-fluid" >*/}
-            <Dashboard />
-            {/*</div>*/}
+            <ToastContainer />
+            <Dashboard/>
         </EthProvider>
     );
 }
