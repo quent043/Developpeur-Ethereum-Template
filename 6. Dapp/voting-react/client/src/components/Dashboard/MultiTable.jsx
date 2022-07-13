@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
 import './Dashboard.css'
 
-function Table({items, title, style}) {
+function MultiTable({items, title, style}) {
     const css = "table " + style;
 
     return (
@@ -25,4 +25,4 @@ function Table({items, title, style}) {
     );
 }
 
-export default Table;
+export default MultiTable;

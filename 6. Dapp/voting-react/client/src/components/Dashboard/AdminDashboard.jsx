@@ -8,7 +8,7 @@ import AddVoters from "./AddVoters";
 function AdminDashboard({account, workflowStatus, contract}) {
     const [errorMessage, setErrorMessage] = useState();
     const [winningProposal, setWinningProposal] = useState();
-    const [voters, setVoters] = useState([""]);
+    const [voters, setVoters] = useState();
     const inputEthAddress = useRef(null);
 
 
@@ -104,6 +104,7 @@ function AdminDashboard({account, workflowStatus, contract}) {
             voters.push(element.returnValues._voterAddress);
         });
         setVoters(voters);
+        console.log(voters.length === 0)
     }
 
 
@@ -111,7 +112,7 @@ function AdminDashboard({account, workflowStatus, contract}) {
         <Fragment>
             {workflowStatus === "0" && <AddVoters handleClick = {handleClick} />}
             <WorkflowChanger handleWorkflowChange = {handleWorkflowChange} workflowStatus = {workflowStatus} />
-            {voters && <Table items={voters} title="Registered Voters"/>}
+            {voters && (voters.length !== 0) && <Table style={"voter-table"} items={voters} title="Registered Voters"/>}
         </Fragment>
     );
 }

@@ -15,10 +15,10 @@ function TitleBlock({name, isVoter, workflowStatus}) {
                 setWorkflowName("Registering Voters")
                 break
             case "1":
-                setWorkflowName("Closed Proposal Registering")
+                setWorkflowName("Registering Proposals")
                 break
             case "2":
-                setWorkflowName("Registering Proposals")
+                setWorkflowName("Closed Proposal Registering")
                 break
             case "3":
                 setWorkflowName("Voting Session Started")

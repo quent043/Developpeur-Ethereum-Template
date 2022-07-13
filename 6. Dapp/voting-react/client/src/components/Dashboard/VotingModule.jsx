@@ -1,50 +1,23 @@
 import React, {Fragment, useState, useEffect, useRef} from 'react';
-import useEth from "../../contexts/EthContext/useEth";
+import Table from "./Table";
 
-function VotingModule({account}) {
-    const { state: { accounts, contract } } = useEth();
-    const proposalId = useRef(null);
-    const [workflowStatus, setWorkflowStatus] = useState();
-    const [voter, setVoter] = useState();
+function VotingModule({account, contract, workflowStatus, proposals, voter}) {
 
     useEffect(() => {
-        _getWorkflowStatus();
-        _getVoter();
-        listenToVoterRegisteredEvent();
+        console.log(voter)
         return () => {
         };
     }, []);
 
-    const _getWorkflowStatus = async () => {
-        try {
-            let status = await contract.methods.workflowStatus().call();
-            setWorkflowStatus(status);
-        } catch (err) {
-            console.error(err.code);
-        }
-    }
 
-    const _getVoter = async () => {
-        try {
-            console.log(await contract.methods);
-            console.log(account);
-            let voter = await contract.methods.getVoter(account).call();
-            setWorkflowStatus("Quentin voter: ", voter);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-    console.log("WorkFlow", workflowStatus);
-
-    const handleClick = () => {
-        _registerProposal(proposalId.current.value);
+    const handleClick = (proposalId) => {
+        _registerProposal(proposalId);
     }
 
     const _registerProposal = async (id) => {
         console.log(id);
         try {
-            await contract.methods.setVote(id).send({from: accounts[0]});
-
+            await contract.methods.setVote(id).send({from: account});
         } catch (err) {
             console.log(err);
             console.error("Contract Error: ", err.code);
@@ -52,36 +25,40 @@ function VotingModule({account}) {
         }
     }
 
-    const listenToVoterRegisteredEvent = () => {
-        contract.events.Voted().on("data", async (event) => {
-            console.log("Event Listener - Voted : ", event)
-            // alert("Voter " + event + "Successfully added");
-        })
-    };
 
     return (
         <Fragment>
-            <div className="container fklex-container">
-                <div>
-                    <h3>Vote for a proposal:</h3>
-                    <p>WorkFlow status : {workflowStatus}</p>
-                </div>
-                <div className="input-group mb-3">
-                    <input type="number" className="form-control"
-                           ref={proposalId}
-                           placeholder="Vote Id"
-                           id="description"
-                           aria-label="Vote Id"
-                           aria-describedby="basic-addon2"
-                    />
-                    <div className="input-group-append">
-                        <button className="btn btn-outline-secondary"
-                                onClick={handleClick}
-                                type="button">Add
-                        </button>
+        {voter.hasVoted && <h3 className="text-center">Thank you for voting</h3>}
+        <div className="proposals-container">
+            {/*<h3>Vote for a proposal:</h3>*/}
+            {/*    <div className="">*/}
+            {/*        <input type="number" className="form-control"*/}
+            {/*               ref={proposalId}*/}
+            {/*               placeholder="Vote Id"*/}
+            {/*               id="description"*/}
+            {/*               aria-label="Vote Id"*/}
+            {/*               aria-describedby="basic-addon2"*/}
+            {/*        />*/}
+            {/*        <div className="input-group-append">*/}
+            {/*            <button className="btn btn-outline-secondary"*/}
+            {/*                    onClick={handleClick}*/}
+            {/*                    type="button">Vote*/}
+            {/*            </button>*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*    {proposals && (proposals.length !== 0) && <Table items={proposals} title="Submitted proposals" style="proposals-table-centered"/>}*/}
+
+            {proposals.map((proposal, index) => (
+                <div key={index} className="card proposal-card">
+                    <div className="card-body">
+                        <h5 className="card-title proposal-card-title">Proposal {index}</h5>
+                        <p className="card-text">{proposal}.</p>
+                        <button disabled={voter.hasVoted} onClick={ ()=> { handleClick(index) } } className="btn btn-primary voting-btn">Vote</button>
                     </div>
                 </div>
-            </div>}
+            ))}
+
+        </div>
         </Fragment>
     );
 }

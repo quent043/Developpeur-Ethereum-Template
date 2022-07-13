@@ -12,13 +12,15 @@ Projet d'application décentralisée de vote utilisant la box React de Truffle, 
 - à l'administrateur de comptabiliser les votes.
 - à tout le monde de consulter le résultat.
 
-## sécurité
+## Sécurité
 
 Pour garantir la sécurité du smart contract contre les éventuelles attaques, les mesures suivantes ont été prises:
 
 - Pas de boucle for pour la comptabilisation des votes des proposals afin d'éviter une attaque DoS. 
 l'enregistrement de proposals par les voters n'êtant pas capée. La proposition gagnante est mise à jour à chaque vote via les variables "winningProposalID" et "maxVotes" (ex-aequo non pris en compte).
+La consommation de gas sera plus élevée, mais n'ayant pas de contexte sur l'utilisation de ce contrat, j'ai privilégié la sécurité à la consommation.
 - La variable "winningProposalID" n'est plus "public" afin d'en permettre la consultation qu'à la fin du vote.
+- Piste d'amélioration: Selon l'utilisation de ce contrat, j'aurai plus considéré de conserver la fonction "tallyVotes()" avec boucle for et de  limitter le nombre de propositions pouvant être soumises par utilisateur.
 
 ## Optimisation
 
