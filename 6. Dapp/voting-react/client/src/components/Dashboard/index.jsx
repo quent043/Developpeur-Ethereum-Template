@@ -7,11 +7,6 @@ import WinningProposalButton from "./WinningProposalButton";
 import NotAVoterPage from "./NotAVoterPage";
 import {toast} from "react-toastify";
 
-//TODO: Add TU?
-//TODO: Augmenter Font?
-//TODO: Check si le owner est aussi voter
-//TODO: Rajouter le _ aux fonctions web3
-
 const Dashboard = () => {
     const {state: {accounts, contract}} = useEth();
     const [isAdmin, setIsAdmin] = useState(false);
@@ -72,10 +67,6 @@ const Dashboard = () => {
     useEffect(() => {
         init();
     }, [contract, accounts]);
-
-    // useEffect(() => {
-    //     isAdmin ? setName("Boss") : setName("User");
-    // }, [isAdmin]);
 
     const getWorkflowStatus = async () => {
         try {
