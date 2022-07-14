@@ -23,7 +23,7 @@ const Dashboard = () => {
 
     const setVoterProfile = (voter) => {
         setVoter(voter);
-        setName("User");
+        setName("Voter");
         setIsAdmin(false);
         setIsVoter(true);
     }
@@ -32,6 +32,14 @@ const Dashboard = () => {
         setName("");
         setIsAdmin(false);
         setIsVoter(false);
+    }
+
+    const getVoter = () => {
+        return contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
+    }
+
+    const updateVoter = async () => {
+        setVoter(await contract.methods.getVoter(accounts[0]).call({from: accounts[0]}));
     }
 
     const init = async () => {
@@ -43,7 +51,7 @@ const Dashboard = () => {
                     setAdminProfile();
                 } else {
                     try {
-                        let voter = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
+                        let voter = await getVoter();
                         if (voter.isRegistered) {
                             setVoterProfile(voter);
                         } else {
@@ -54,7 +62,7 @@ const Dashboard = () => {
                     }
                 }
                 listenToWorkflowEvents();
-                listenToVotingEvents();
+                // listenToVotingEvents();
                 await getWorkflowStatus();
                 setLoaded(true);
             }
@@ -83,16 +91,17 @@ const Dashboard = () => {
         })
     };
 
-    const listenToVotingEvents = () => {
-        contract.events.Voted().on("data", async () => {
-            try {
-                let response = await contract.methods.getVoter(accounts[0]).call({from: accounts[0]});
-                setVoter(response);
-            } catch (err) {
-                toast.error("Error connecting to the blockchain");
-            }
-        })
-    };
+    // const listenToVotingEvents = () => {
+    //     contract.events.Voted().on("data", async () => {
+    //         try {
+    //             let response = await getVoter();
+    //             setVoter(response);
+    //         } catch (err) {
+    //             console.log("voter listener")
+    //             toast.error("Error connecting to the blockchain");
+    //         }
+    //     })
+    // };
 
     return (
         loaded &&
@@ -101,7 +110,7 @@ const Dashboard = () => {
                 <TitleBlock name={name} isVoter={isVoter} workflowStatus={workflowStatus} />}
             <div className="container">
                 {isAdmin && <AdminDashboard account={accounts[0]} contract={contract} workflowStatus={workflowStatus}/>}
-                {(isVoter && !isAdmin) && <UserDashboard account={accounts[0]} contract={contract} workflowStatus={workflowStatus} voter={voter} />}
+                {(isVoter && !isAdmin) && <UserDashboard account={accounts[0]} contract={contract} workflowStatus={workflowStatus} voter={voter} updateVoter={updateVoter} />}
                 {(!isVoter && !isAdmin) && <NotAVoterPage />}
                 <WinningProposalButton workflowStatus={workflowStatus} contract={contract} />
             </div>

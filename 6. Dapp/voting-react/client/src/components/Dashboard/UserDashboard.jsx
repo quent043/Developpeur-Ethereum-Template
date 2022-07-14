@@ -5,7 +5,7 @@ import ClosedProposalMenu from "./ClosedProposalMenu";
 import ClosedVotingSession from "./ClosedVotingSession";
 import {toast} from "react-toastify";
 
-function UserDashboard({account, contract, workflowStatus, voter}) {
+function UserDashboard({account, contract, workflowStatus, voter, updateVoter}) {
     const [proposals, setProposals] = useState([]);
 
     useEffect(() => {
@@ -63,7 +63,7 @@ function UserDashboard({account, contract, workflowStatus, voter}) {
             {workflowStatus === "3" &&
                 <VotingModule account={account} workflowStatus={workflowStatus}
                               contract={contract} proposals={proposals}
-                              voter={voter}/>}
+                              voter={voter} updateVoter={updateVoter}/>}
             {workflowStatus === "4" && <ClosedVotingSession/>}
         </div>
     );

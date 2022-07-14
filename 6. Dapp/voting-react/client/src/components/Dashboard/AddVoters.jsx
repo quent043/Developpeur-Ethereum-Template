@@ -5,6 +5,7 @@ function AddVoters({handleClick}) {
 
     const onClick = () => {
         handleClick(inputEthAddress.current.value);
+        inputEthAddress.current.value = "";
     }
 
     return (

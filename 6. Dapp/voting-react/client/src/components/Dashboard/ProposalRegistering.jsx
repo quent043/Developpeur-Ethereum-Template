@@ -1,15 +1,12 @@
 import React, {useRef} from 'react';
 import Table from "./Table";
 
-export const ProposalRegistering = ({
-                                        workflowStatus,
-                                        proposals,
-                                        handleRegisterProposal
-                                    }) => {
+export const ProposalRegistering = ({workflowStatus, proposals, handleRegisterProposal}) => {
     const proposalDescription = useRef(null);
 
     const handleClick = () => {
         handleRegisterProposal(proposalDescription.current.value);
+        proposalDescription.current.value = "";
     }
 
     return (
