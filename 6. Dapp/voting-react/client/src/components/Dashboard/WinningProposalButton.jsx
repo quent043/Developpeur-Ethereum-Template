@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import {toast} from "react-toastify";
 
 function WinningProposalButton({workflowStatus, contract}) {
     const [winningProposal, setWinningProposal] = useState();

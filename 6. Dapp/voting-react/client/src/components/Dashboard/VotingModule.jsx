@@ -1,12 +1,7 @@
-import React, {Fragment, useEffect} from 'react';
+import React, {Fragment} from 'react';
 import {toast} from "react-toastify";
 
 function VotingModule({account, contract, proposals, voter}) {
-
-    useEffect(() => {
-        return () => {
-        };
-    }, []);
 
     const handleRegisterProposal = async (proposalId) => {
         try {

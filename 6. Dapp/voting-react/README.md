@@ -2,6 +2,8 @@
 
 Projet d'application décentralisée de vote utilisant la box React de Truffle, devant permettre:
 
+URL de la Dapp: https://benefique-chocolatine-75022.herokuapp.com/
+
 - l’enregistrement d’une liste blanche d'électeurs.
 - à l'administrateur de commencer la session d'enregistrement de la proposition.
 - aux électeurs inscrits d’enregistrer leurs propositions.
