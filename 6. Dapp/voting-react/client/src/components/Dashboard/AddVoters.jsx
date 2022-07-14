@@ -11,7 +11,7 @@ function AddVoters({handleClick}) {
         <div>
             <h3>Add a voter:</h3>
             <div className="input-group mb-3">
-                <input type="text" className="form-control"
+                <input type="text" className="form-control input-address"
                        ref={inputEthAddress}
                        placeholder="Voter's ETH Address"
                        id="ethAddress"
@@ -19,7 +19,7 @@ function AddVoters({handleClick}) {
                        aria-describedby="basic-addon2"
                 />
                 <div className="input-group-append">
-                    <button className="btn btn-outline-secondary" onClick={onClick}
+                    <button className="btn btn-primary input-add-button" onClick={onClick}
                             type="button">Add
                     </button>
                 </div>

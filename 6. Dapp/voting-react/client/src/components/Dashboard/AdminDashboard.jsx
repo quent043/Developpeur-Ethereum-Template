@@ -24,6 +24,7 @@ function AdminDashboard({account, workflowStatus, contract}) {
     const _registerVoter = async (voterAddress) => {
         try {
             await contract.methods.addVoter(voterAddress).send({from: account});
+            toast.success("Voter successfully registered");
             getVoters();
         } catch (err) {
             toast.error("Error connecting to the blockchain");
@@ -77,7 +78,6 @@ function AdminDashboard({account, workflowStatus, contract}) {
             voters.push(element.returnValues._voterAddress);
         });
         setVoters(voters);
-        console.log(voters.length === 0)
     }
 
 

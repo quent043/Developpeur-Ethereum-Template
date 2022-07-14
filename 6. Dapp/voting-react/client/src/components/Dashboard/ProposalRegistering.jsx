@@ -26,7 +26,7 @@ export const ProposalRegistering = ({
                                aria-describedby="basic-addon2"
                         />
                         <div className="input-group-append">
-                            <button className="btn btn-outline-secondary"
+                            <button className="btn btn-primary input-add-button"
                                     onClick={handleClick}
                                     type="button">Add
                             </button>

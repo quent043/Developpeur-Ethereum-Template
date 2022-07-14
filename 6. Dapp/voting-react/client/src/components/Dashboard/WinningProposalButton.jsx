@@ -11,9 +11,8 @@ function WinningProposalButton({workflowStatus, contract}) {
                 let winningProposal = await contract.methods.getWinningProposal().call();
                 (winningProposal.voteCount === "0") ? setErrorMessage("Nobody voted, no proposal won") : setWinningProposal(winningProposal);
             } catch (err) {
-                toast.error("Error connecting to the blockchain");
                 setWinningProposal(null);
-                setErrorMessage("Nobody voted, no proposal won");
+                setErrorMessage("No Proposal Was ever submitted");
             }
         }
     }
@@ -22,7 +21,7 @@ function WinningProposalButton({workflowStatus, contract}) {
         <div className="winning-btn-block">
             {workflowStatus === "5" &&
                 <button className="btn btn-info btn-winner" onClick={getWinningId}>Get Winning Proposal</button>}
-            {winningProposal && <h3>Proposal {winningProposal.description} won with {winningProposal.voteCount} votes</h3>}
+            {winningProposal && <h3>Proposal "{winningProposal.description}" won with {winningProposal.voteCount} votes</h3>}
             {errorMessage && <h3>{errorMessage}</h3>}
         </div>
     );

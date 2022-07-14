@@ -14,14 +14,10 @@ function UserDashboard({account, contract, workflowStatus, voter}) {
         };
     }, []);
 
-
-    const handleRegisterProposal = (proposal) => {
-        registerProposal(proposal);
-    }
-
-    const registerProposal = async (description) => {
+    const handleRegisterProposal = async (description) => {
         try {
             await contract.methods.addProposal(description).send({from: account});
+            toast.success("Proposal successfully registered !");
             await getProposalEvents();
         } catch (err) {
             toast.error("Error connecting to the blockchain");

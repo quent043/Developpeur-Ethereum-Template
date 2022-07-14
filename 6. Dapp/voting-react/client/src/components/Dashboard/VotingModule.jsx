@@ -4,19 +4,14 @@ import {toast} from "react-toastify";
 function VotingModule({account, contract, proposals, voter}) {
 
     useEffect(() => {
-        console.log(voter)
         return () => {
         };
     }, []);
 
-
-    const handleClick = async (proposalId) => {
-        await _registerProposal(proposalId);
-    }
-
-    const _registerProposal = async (id) => {
+    const handleRegisterProposal = async (proposalId) => {
         try {
-            await contract.methods.setVote(id).send({from: account});
+            await contract.methods.setVote(proposalId).send({from: account});
+            toast.success("You successfully voted for proposal " + proposalId);
         } catch (err) {
             toast.error("Error connecting to the blockchain");
         }
@@ -32,7 +27,7 @@ function VotingModule({account, contract, proposals, voter}) {
                         <div className="proposal-card-title card-header">Proposal {index}</div>
                         <div className="card-body">
                             <p className="card-text">{proposal}.</p>
-                            <button disabled={voter.hasVoted} onClick={ ()=> { handleClick(index) } } className="btn btn-primary voting-btn">Vote</button>
+                            <button disabled={voter.hasVoted} onClick={ ()=> { handleRegisterProposal(index) } } className="btn btn-primary voting-btn">Vote</button>
                         </div>
                     </div>
                 ))}

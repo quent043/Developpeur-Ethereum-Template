@@ -138,3 +138,12 @@ button {
     width: fit-content;
     text-align: center;
 }
+
+.input-address {
+    border: solid 2px;
+}
+
+.input-add-button {
+    margin: 0 0 0 7px;
+    /*padding: 5px;*/
+}
