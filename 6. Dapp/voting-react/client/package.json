@@ -5,6 +5,8 @@
   "engines": {
     "node": "16.x"
   },
+  "homepage": "https://github.com/quent043/Developpeur-Ethereum-Template/tree/master/6.%20Dapp/voting-react/client",
+
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.2.0",
@@ -22,7 +24,9 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

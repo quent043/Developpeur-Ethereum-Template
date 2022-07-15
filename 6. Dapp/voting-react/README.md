@@ -2,7 +2,6 @@
 
 Projet d'application décentralisée de vote utilisant la box React de Truffle, devant permettre:
 
-URL de la Dapp: https://benefique-chocolatine-75022.herokuapp.com/
 
 - l’enregistrement d’une liste blanche d'électeurs.
 - à l'administrateur de commencer la session d'enregistrement de la proposition.
@@ -14,6 +13,17 @@ URL de la Dapp: https://benefique-chocolatine-75022.herokuapp.com/
 - à l'administrateur de comptabiliser les votes.
 - à tout le monde de consulter le résultat.
 ---
+
+
+## Documentation & liens
+
+- URL Heroku de la Dapp: https://benefique-chocolatine-75022.herokuapp.com/
+- URL GithubPages: https://quent043.github.io/solidity-react-voting/
+- Vidéo présentation de la Dapp: https://www.loom.com/share/82bbc38561134c2b9c95b9b6659a2ddd
+- Vidéos présentation du code: https://www.loom.com/share/97f93575ed9c4e96b1c8527fe2df6c48 & https://www.loom.com/share/773d0402e92c47ef97d82a820b4d3d23
+
+---
+
 ## Sécurité
 
 Pour garantir la sécurité du smart contract contre les éventuelles attaques, les mesures suivantes ont été prises:
